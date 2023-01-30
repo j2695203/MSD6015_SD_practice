@@ -25,6 +25,18 @@ bool Num::equals(Expr* e){
     }
 }
 
+int Num::interp(){
+    return this->val;
+}
+
+bool Num::has_variable(){
+    return false;
+}
+
+Expr* Num::subst(std::string str_new, Expr *e){
+    return ( new Num( this->val ) ); // don't need to substitute a number
+}
+
 /*
  Class Add
  */
@@ -42,6 +54,20 @@ bool Add::equals(Expr* e){
         return( this->lhs->equals(n->lhs) && this->rhs->equals(n->rhs) );
     }
 }
+
+int Add::interp() {
+    return( lhs->interp() + rhs->interp() );
+}
+
+bool Add::has_variable(){
+    return( lhs->has_variable() || rhs->has_variable() );
+}
+
+Expr* Add::subst(std::string str_new, Expr *e){
+    return ( new Add( (lhs->subst(str_new, e)) , (rhs->subst(str_new, e))) ) ;
+}
+
+
 
 /*
 Class Mult
@@ -61,6 +87,19 @@ bool Mult::equals(Expr* e){
     }
 }
 
+int Mult::interp(){
+    return( lhs->interp() * rhs->interp() );
+}
+
+bool Mult::has_variable(){
+    return( lhs->has_variable() || rhs->has_variable() );
+}
+
+Expr* Mult::subst(std::string str_new, Expr *e){
+    return ( new Mult( (lhs->subst(str_new, e)) , (rhs->subst(str_new, e))) ) ;
+}
+
+
 /*
  Class Var (variable)
  */
@@ -75,6 +114,23 @@ bool Var::equals(Expr* e){
         return false;
     }else{
         return( this->str == n->str );
+    }
+}
+
+int Var::interp(){
+    throw std::runtime_error("no value for variable");
+}
+
+bool Var::has_variable(){
+    return true;
+}
+
+Expr* Var::subst(std::string str_new, Expr *e){
+    // substitute this Var Expr by e if the string of this Var Expr equals str_new
+    if(this->str == str_new){
+        return e;
+    }else{
+        return ( new Var(this->str) );
     }
 }
 
@@ -104,11 +160,16 @@ TEST_CASE("Test_Equal_Within_Same_Class"){
         Add* add_NoEq = new Add(new Num(10), new Num(20));
         Add* add_NoEq_rev = new Add(new Num(7), new Num(5));
         Add* add_NoEq_neg = new Add(new Num(-5), new Num(-7));
+        Add* add_var = new Add(new Var("dog"), new Var("cat"));
+        Add* add_var_Eq = new Add(new Var("dog"), new Var("cat"));
+        Add* add_var_NoEq = new Add(new Var("PIGGG"), new Var("cat"));
         
         CHECK( add_Base -> equals(add_Eq) );
         CHECK_FALSE( add_Base -> equals(add_NoEq) );
         CHECK_FALSE( add_Base -> equals(add_NoEq_rev) );
         CHECK_FALSE( add_Base -> equals(add_NoEq_neg) );
+        CHECK( add_var -> equals(add_var_Eq) );
+        CHECK_FALSE( add_var -> equals(add_var_NoEq) );
     }
  
     SECTION("expr_multiple"){
@@ -147,4 +208,90 @@ TEST_CASE("Test_Equal_Not_Same_Class"){
         Mult* mult = new Mult ( new Num(3), new Num(0) );
         CHECK_FALSE( add -> equals(mult) );
     }
+}
+
+TEST_CASE("Test_interp()"){
+    
+    SECTION("addExpr"){
+        CHECK( (new Add(new Add(new Num(10), new Num(15)),new Add(new Num(20),new Num(20))))->interp() == 65); // num only
+        CHECK_THROWS_WITH( (new Add(new Var("dog"), new Var("cat")))->interp(), "no value for variable" ); // var only
+        CHECK_THROWS_WITH( (new Add(new Var("dog"), new Num(2)))->interp(), "no value for variable" ); // num + var
+    }
+
+    SECTION("multExpr"){
+        CHECK( (new Mult(new Num(3), new Num(2)))->interp() == 6 ); // num only
+        CHECK_THROWS_WITH( (new Mult(new Var("dog"), new Var("cat")))->interp(), "no value for variable" ); // var only
+        CHECK_THROWS_WITH( (new Mult(new Var("dog"), new Num(2)))->interp(), "no value for variable" ); // num + var
+    }
+    
+    SECTION("numExpr_only"){
+        CHECK( (new Num(5))->interp() == 5 );
+    }
+    
+    SECTION("varExpr_only"){
+        CHECK_THROWS_WITH( (new Var("x"))->interp(), "no value for variable" );
+    }
+   
+}
+
+TEST_CASE("Test_hasVariable()"){
+    
+    SECTION("addExpr"){
+        CHECK_FALSE( (new Add(new Add(new Num(10), new Num(15)),new Add(new Num(20),new Num(20))))->has_variable() ); // num only
+        CHECK( (new Add(new Var("dog"), new Var("cat")))->has_variable() ); // var only
+        CHECK( (new Add(new Var("dog"), new Num(2)))->has_variable() ); // num + var
+    }
+
+    SECTION("multExpr"){
+        CHECK_FALSE( (new Mult(new Num(3), new Num(2)))->has_variable() ); // num only
+        CHECK( (new Mult(new Var("dog"), new Var("cat")))->has_variable() ); // var only
+        CHECK( (new Mult(new Var("dog"), new Num(2)))->has_variable() ); // num + var
+    }
+    
+    SECTION("numExpr_only"){
+        CHECK_FALSE( (new Num(5))->has_variable() );
+    }
+    
+    SECTION("varExpr_only"){
+        CHECK( (new Var("x"))->has_variable() );
+    }
+}
+
+TEST_CASE("Test_subst()"){
+    
+    SECTION("addExpr"){
+        // did substitute
+        CHECK( (new Add(new Var("x"), new Num(7)))
+               ->subst("x", new Var("y"))
+               ->equals(new Add(new Var("y"), new Num(7))) );
+        // didn't substitute
+        CHECK( (new Add(new Var("x"), new Num(7)))
+               ->subst("no_match_str", new Var("y"))
+               ->equals(new Add(new Var("x"), new Num(7))) );
+        
+    }
+
+    SECTION("multExpr"){
+        // did substitute with nested Expr
+        CHECK( ( new Mult( ( new Mult(new Var("x"),new Num(7)) )  ,  (new Mult(new Var("x"),new Num(7))) ) )
+               ->subst("x", new Var("y"))
+               ->equals( new Mult( ( new Mult(new Var("y"),new Num(7)) )  ,  (new Mult(new Var("y"),new Num(7))) ) ) );
+        // didn't substitute with nested Expr
+        CHECK( (new Mult(new Var("x"), new Num(7)))
+               ->subst("no_match_str", new Var("y"))
+               ->equals(new Mult(new Var("x"), new Num(7))) );
+    }
+    
+    SECTION("numExpr_only"){
+        // never substitute
+        CHECK( (new Num(5))->subst("5", new Num(-1))->equals(new Num(5)) );
+    }
+    
+    SECTION("varExpr_only"){
+        // did substitute
+        CHECK( (new Var("original"))->subst("original", new Var("new"))->equals(new Var("new")) );
+        // didn't substitute
+        CHECK( (new Var("original"))->subst("no_match", new Var("new"))->equals(new Var("original")) );
+    }
+    
 }
