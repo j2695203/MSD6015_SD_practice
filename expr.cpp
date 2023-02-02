@@ -276,7 +276,7 @@ TEST_CASE("Test_subst()"){
         CHECK( ( new Mult( ( new Mult(new Var("x"),new Num(7)) )  ,  (new Mult(new Var("x"),new Num(7))) ) )
                ->subst("x", new Var("y"))
                ->equals( new Mult( ( new Mult(new Var("y"),new Num(7)) )  ,  (new Mult(new Var("y"),new Num(7))) ) ) );
-        // didn't substitute with nested Expr
+        // didn't substitute
         CHECK( (new Mult(new Var("x"), new Num(7)))
                ->subst("no_match_str", new Var("y"))
                ->equals(new Mult(new Var("x"), new Num(7))) );
