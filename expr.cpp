@@ -291,7 +291,7 @@ TEST_CASE("Test_subst()"){
         // did substitute
         CHECK( (new Var("original"))->subst("original", new Var("new"))->equals(new Var("new")) );
         // didn't substitute
-        CHECK_FALSE( (new Var("original"))->subst("no_match", new Var("new"))->equals(new Var("original")) );
+        CHECK( (new Var("original"))->subst("no_match", new Var("new"))->equals(new Var("original")) );
     }
     
 }
