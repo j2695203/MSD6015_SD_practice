@@ -26,3 +26,8 @@ msdscript: $(CXXSOURCE) $(HEADERS)
 clean:
 	rm -f *.o msdscript
 
+.PHONY: test
+
+test: msdscript
+	./msdscript --test
+
