@@ -1,0 +1,124 @@
+\hypertarget{class_var}{}\doxysection{Var Class Reference}
+\label{class_var}\index{Var@{Var}}
+Inheritance diagram for Var\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_var}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_var_afab4e8a4c51caf066de99168b9f6d96e}\label{class_var_afab4e8a4c51caf066de99168b9f6d96e}} 
+{\bfseries Var} (std\+::string \mbox{\hyperlink{class_var_a9a4c88f0bfe84fa5b606478176467cd2}{str}})
+\item 
+bool \mbox{\hyperlink{class_var_a36314fbf7736f619da64b854f4437949}{equals}} (\mbox{\hyperlink{class_expr}{Expr}} $\ast$e)
+\begin{DoxyCompactList}\small\item\em Compare if two Expressions are the same type with same arguments. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{class_var_ac6df55db7c2447d3090dd99ae247ae80}{interp}} ()
+\begin{DoxyCompactList}\small\item\em A variable has no value, so interp for a variable should throw a std\+::runtime\+\_\+error exception. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{class_var_a6083356e4955e1edfb76b8432672c93e}{has\+\_\+variable}} ()
+\begin{DoxyCompactList}\small\item\em Check if the \mbox{\hyperlink{class_var}{Var}} expression is a variable. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{class_expr}{Expr}} $\ast$ \mbox{\hyperlink{class_var_a4663d8ee66ce49fbfd8f3fccf7be14a8}{subst}} (std\+::string str\+\_\+new, \mbox{\hyperlink{class_expr}{Expr}} $\ast$e)
+\begin{DoxyCompactList}\small\item\em Everywhere that the expression (whose subst method is called) contains a variable matching the str\+\_\+new, the result Expr$\ast$ should have the given replacement, instead. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactItemize}
+\item 
+virtual bool \mbox{\hyperlink{class_expr_abf9cdb765fb84304881789d273d7594f}{equals}} (\mbox{\hyperlink{class_expr}{Expr}} $\ast$e)=0
+\item 
+virtual int \mbox{\hyperlink{class_expr_aeba8585d8225419d49166371306542c1}{interp}} ()=0
+\item 
+virtual bool \mbox{\hyperlink{class_expr_a92dc26078993a4b9721ea732274a435c}{has\+\_\+variable}} ()=0
+\item 
+virtual \mbox{\hyperlink{class_expr}{Expr}} $\ast$ \mbox{\hyperlink{class_expr_aed06082781434efe108e64447c1086d4}{subst}} (std\+::string str\+\_\+new, \mbox{\hyperlink{class_expr}{Expr}} $\ast$e)=0
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_var_a9a4c88f0bfe84fa5b606478176467cd2}\label{class_var_a9a4c88f0bfe84fa5b606478176467cd2}} 
+std\+::string {\bfseries str}
+\begin{DoxyCompactList}\small\item\em string value of the \mbox{\hyperlink{class_var}{Var}} expression \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_var_a36314fbf7736f619da64b854f4437949}\label{class_var_a36314fbf7736f619da64b854f4437949}} 
+\index{Var@{Var}!equals@{equals}}
+\index{equals@{equals}!Var@{Var}}
+\doxysubsubsection{\texorpdfstring{equals()}{equals()}}
+{\footnotesize\ttfamily bool Var\+::equals (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_expr}{Expr}} $\ast$}]{e }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Compare if two Expressions are the same type with same arguments. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em e} & first argument,the Expression to be compared \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool if the Expression to be compared is a \mbox{\hyperlink{class_var}{Var}} Expression with same arguments 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_expr}{Expr}}.
+
+\mbox{\Hypertarget{class_var_a6083356e4955e1edfb76b8432672c93e}\label{class_var_a6083356e4955e1edfb76b8432672c93e}} 
+\index{Var@{Var}!has\_variable@{has\_variable}}
+\index{has\_variable@{has\_variable}!Var@{Var}}
+\doxysubsubsection{\texorpdfstring{has\_variable()}{has\_variable()}}
+{\footnotesize\ttfamily bool Var\+::has\+\_\+variable (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Check if the \mbox{\hyperlink{class_var}{Var}} expression is a variable. 
+
+\begin{DoxyReturn}{Returns}
+bool if the \mbox{\hyperlink{class_var}{Var}} expression is a variable. It should always return true. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_expr}{Expr}}.
+
+\mbox{\Hypertarget{class_var_ac6df55db7c2447d3090dd99ae247ae80}\label{class_var_ac6df55db7c2447d3090dd99ae247ae80}} 
+\index{Var@{Var}!interp@{interp}}
+\index{interp@{interp}!Var@{Var}}
+\doxysubsubsection{\texorpdfstring{interp()}{interp()}}
+{\footnotesize\ttfamily int Var\+::interp (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+A variable has no value, so interp for a variable should throw a std\+::runtime\+\_\+error exception. 
+
+
+
+Implements \mbox{\hyperlink{class_expr}{Expr}}.
+
+\mbox{\Hypertarget{class_var_a4663d8ee66ce49fbfd8f3fccf7be14a8}\label{class_var_a4663d8ee66ce49fbfd8f3fccf7be14a8}} 
+\index{Var@{Var}!subst@{subst}}
+\index{subst@{subst}!Var@{Var}}
+\doxysubsubsection{\texorpdfstring{subst()}{subst()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_expr}{Expr}} $\ast$ Var\+::subst (\begin{DoxyParamCaption}\item[{std\+::string}]{str\+\_\+new,  }\item[{\mbox{\hyperlink{class_expr}{Expr}} $\ast$}]{e }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Everywhere that the expression (whose subst method is called) contains a variable matching the str\+\_\+new, the result Expr$\ast$ should have the given replacement, instead. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em str\+\_\+new} & first argument, the string to be replaced \\
+\hline
+{\em e} & second argument, the Expression replace str\+\_\+new \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Expr$\ast$ that after replacement 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_expr}{Expr}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/jinny/\+MSD/my6015\+Repo/expr.\+hpp\item 
+/\+Users/jinny/\+MSD/my6015\+Repo/\mbox{\hyperlink{expr_8cpp}{expr.\+cpp}}\end{DoxyCompactItemize}

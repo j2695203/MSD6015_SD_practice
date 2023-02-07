@@ -1,9 +1,9 @@
-//
-//  cmdline.hpp
-//  HW1_MSDscriptCommandLine
-//
-//  Created by Jinny Jeng on 1/16/23.
-//
+/**
+* \file cmdline.h
+* \brief cmdline class
+*
+* Longer description goes here.
+*/
 
 #ifndef cmdline_hpp
 #define cmdline_hpp

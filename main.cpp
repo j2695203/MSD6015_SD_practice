@@ -5,6 +5,12 @@
 //  Created by Jinny Jeng on 1/17/23.
 //
 
+/**
+* \mainpage MSDScript
+* \author Jinny
+*\date 01-17-2023
+*/
+
 #include <iostream>
 #include "expr.hpp"
 #include "cmdline.hpp"

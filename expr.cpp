@@ -1,9 +1,10 @@
-//
-//  expr.cpp
-//  HW2_ExpressionClasses
-//
-//  Created by Jinny Jeng on 1/17/23.
-//
+/**
+* \file expr.cpp
+* \brief contains expression class definition
+*
+* No more verbose description here lol
+* \author Jinny
+*/
 
 #include "expr.hpp"
 #include "catch.h"
@@ -12,10 +13,16 @@
  Class Num
  */
 
+
 Num::Num(int val) {
     this->val = val;
 }
 
+/**
+* \brief Compare if two Expressions are the same type with same arguments
+* \param e first argument,the Expression to be compared
+* \return bool if the Expression to be compared is a Number Expression
+*/
 bool Num::equals(Expr* e){
     Num* n = dynamic_cast<Num*>(e);
     if(n == NULL){
@@ -25,17 +32,33 @@ bool Num::equals(Expr* e){
     }
 }
 
+/**
+* \brief return an int for the value of the number.
+* \return int for this Number Expression
+*/
 int Num::interp(){
     return this->val;
 }
-
+/**
+* \brief Check if the expression is a variable or contains a variable. Num expression always return false.
+* \return bool if the num expression is a variable. It should always return false.
+*/
 bool Num::has_variable(){
     return false;
 }
-
+/**
+* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
+* \param str_new first argument, the string to be replaced
+* \param e second argument, the Expression replace str_new
+* \return Expr* that after replacement
+*/
 Expr* Num::subst(std::string str_new, Expr *e){
     return ( new Num( this->val ) ); // don't need to substitute a number
 }
+
+//void Num::print(std::ostream& ot){
+//    ot<<std::to_string(val);
+//}
 
 /*
  Class Add
@@ -46,6 +69,11 @@ Add::Add(Expr *lhs, Expr *rhs) {
     this->rhs = rhs;
 }
 
+/**
+* \brief Compare if two Expressions are the same type with same arguments
+* \param e first argument,the Expression to be compared
+* \return bool if the Expression to be compared is a Add Expression with same arguments
+*/
 bool Add::equals(Expr* e){
     Add* n = dynamic_cast<Add*>(e);
     if(n == NULL){
@@ -55,14 +83,26 @@ bool Add::equals(Expr* e){
     }
 }
 
+/**
+* \brief Calculate the sum of the subexpression values
+* \return int for this Add Expression
+*/
 int Add::interp() {
     return( lhs->interp() + rhs->interp() );
 }
-
+/**
+* \brief Check if the Add expression is a variable or contains a variable.
+* \return bool if the Add expression is a variable or contains a variable.
+*/
 bool Add::has_variable(){
     return( lhs->has_variable() || rhs->has_variable() );
 }
-
+/**
+* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
+* \param str_new first argument, the string to be replaced
+* \param e second argument, the Expression replace str_new
+* \return Expr* that after replacement
+*/
 Expr* Add::subst(std::string str_new, Expr *e){
     return ( new Add( (lhs->subst(str_new, e)) , (rhs->subst(str_new, e))) ) ;
 }
@@ -78,6 +118,11 @@ Mult::Mult(Expr *lhs, Expr *rhs) {
     this->rhs = rhs;
 }
 
+/**
+* \brief Compare if two Expressions are the same type with same arguments
+* \param e first argument,the Expression to be compared
+* \return bool if the Expression to be compared is a Mult Expression with same arguments
+*/
 bool Mult::equals(Expr* e){
     Mult* n = dynamic_cast<Mult*>(e);
     if(n == NULL){
@@ -87,14 +132,26 @@ bool Mult::equals(Expr* e){
     }
 }
 
+/**
+* \brief Calculate the product of the subexpression values
+* \return int for this Mult Expression
+*/
 int Mult::interp(){
     return( lhs->interp() * rhs->interp() );
 }
-
+/**
+* \brief Check if the Mult expression is a variable or contains a variable.
+* \return bool if the Mult expression is a variable or contains a variable.
+*/
 bool Mult::has_variable(){
     return( lhs->has_variable() || rhs->has_variable() );
 }
-
+/**
+* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
+* \param str_new first argument, the string to be replaced
+* \param e second argument, the Expression replace str_new
+* \return Expr* that after replacement
+*/
 Expr* Mult::subst(std::string str_new, Expr *e){
     return ( new Mult( (lhs->subst(str_new, e)) , (rhs->subst(str_new, e))) ) ;
 }
@@ -108,6 +165,11 @@ Var::Var(std::string str) {
     this->str = str;
 }
 
+/**
+* \brief Compare if two Expressions are the same type with same arguments
+* \param e first argument,the Expression to be compared
+* \return bool if the Expression to be compared is a Var Expression with same arguments
+*/
 bool Var::equals(Expr* e){
     Var* n = dynamic_cast<Var*>(e);
     if(n == NULL){
@@ -117,14 +179,25 @@ bool Var::equals(Expr* e){
     }
 }
 
+/**
+* \brief A variable has no value, so interp for a variable should throw a std::runtime_error exception
+*/
 int Var::interp(){
     throw std::runtime_error("no value for variable");
 }
-
+/**
+* \brief Check if the Var expression is a variable.
+* \return bool if the Var expression is a variable. It should always return true.
+*/
 bool Var::has_variable(){
     return true;
 }
-
+/**
+* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
+* \param str_new first argument, the string to be replaced
+* \param e second argument, the Expression replace str_new
+* \return Expr* that after replacement
+*/
 Expr* Var::subst(std::string str_new, Expr *e){
     // substitute this Var Expr by e if the string of this Var Expr equals str_new
     if(this->str == str_new){

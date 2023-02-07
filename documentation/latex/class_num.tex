@@ -1,0 +1,127 @@
+\hypertarget{class_num}{}\doxysection{Num Class Reference}
+\label{class_num}\index{Num@{Num}}
+Inheritance diagram for Num\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_num}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_num_a9fce58e650a99ae50f4140ed9c87ec9f}\label{class_num_a9fce58e650a99ae50f4140ed9c87ec9f}} 
+{\bfseries Num} (int \mbox{\hyperlink{class_num_ab0654582066deb3adbbd64cf7190a7b7}{val}})
+\item 
+bool \mbox{\hyperlink{class_num_a3bf692f7d3fc54e016affbe618ec11e4}{equals}} (\mbox{\hyperlink{class_expr}{Expr}} $\ast$e)
+\begin{DoxyCompactList}\small\item\em Compare if two Expressions are the same type with same arguments. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{class_num_a24f8a1c7ccad82bf7ed1080b59cda6dd}{interp}} ()
+\begin{DoxyCompactList}\small\item\em return an int for the value of the number. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{class_num_ad0ce114704933a1ebe4629848d3e2d6d}{has\+\_\+variable}} ()
+\begin{DoxyCompactList}\small\item\em Check if the expression is a variable or contains a variable. \mbox{\hyperlink{class_num}{Num}} expression always return false. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{class_expr}{Expr}} $\ast$ \mbox{\hyperlink{class_num_a9f4f1d071698589a8a73eb00ad37fa31}{subst}} (std\+::string str\+\_\+new, \mbox{\hyperlink{class_expr}{Expr}} $\ast$e)
+\begin{DoxyCompactList}\small\item\em Everywhere that the expression (whose subst method is called) contains a variable matching the str\+\_\+new, the result Expr$\ast$ should have the given replacement, instead. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactItemize}
+\item 
+virtual bool \mbox{\hyperlink{class_expr_abf9cdb765fb84304881789d273d7594f}{equals}} (\mbox{\hyperlink{class_expr}{Expr}} $\ast$e)=0
+\item 
+virtual int \mbox{\hyperlink{class_expr_aeba8585d8225419d49166371306542c1}{interp}} ()=0
+\item 
+virtual bool \mbox{\hyperlink{class_expr_a92dc26078993a4b9721ea732274a435c}{has\+\_\+variable}} ()=0
+\item 
+virtual \mbox{\hyperlink{class_expr}{Expr}} $\ast$ \mbox{\hyperlink{class_expr_aed06082781434efe108e64447c1086d4}{subst}} (std\+::string str\+\_\+new, \mbox{\hyperlink{class_expr}{Expr}} $\ast$e)=0
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_num_ab0654582066deb3adbbd64cf7190a7b7}\label{class_num_ab0654582066deb3adbbd64cf7190a7b7}} 
+int {\bfseries val}
+\begin{DoxyCompactList}\small\item\em integer value of the Number expression \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_num_a3bf692f7d3fc54e016affbe618ec11e4}\label{class_num_a3bf692f7d3fc54e016affbe618ec11e4}} 
+\index{Num@{Num}!equals@{equals}}
+\index{equals@{equals}!Num@{Num}}
+\doxysubsubsection{\texorpdfstring{equals()}{equals()}}
+{\footnotesize\ttfamily bool Num\+::equals (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_expr}{Expr}} $\ast$}]{e }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Compare if two Expressions are the same type with same arguments. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em e} & first argument,the Expression to be compared \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+bool if the Expression to be compared is a Number Expression 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_expr}{Expr}}.
+
+\mbox{\Hypertarget{class_num_ad0ce114704933a1ebe4629848d3e2d6d}\label{class_num_ad0ce114704933a1ebe4629848d3e2d6d}} 
+\index{Num@{Num}!has\_variable@{has\_variable}}
+\index{has\_variable@{has\_variable}!Num@{Num}}
+\doxysubsubsection{\texorpdfstring{has\_variable()}{has\_variable()}}
+{\footnotesize\ttfamily bool Num\+::has\+\_\+variable (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Check if the expression is a variable or contains a variable. \mbox{\hyperlink{class_num}{Num}} expression always return false. 
+
+\begin{DoxyReturn}{Returns}
+bool if the num expression is a variable. It should always return false. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_expr}{Expr}}.
+
+\mbox{\Hypertarget{class_num_a24f8a1c7ccad82bf7ed1080b59cda6dd}\label{class_num_a24f8a1c7ccad82bf7ed1080b59cda6dd}} 
+\index{Num@{Num}!interp@{interp}}
+\index{interp@{interp}!Num@{Num}}
+\doxysubsubsection{\texorpdfstring{interp()}{interp()}}
+{\footnotesize\ttfamily int Num\+::interp (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+return an int for the value of the number. 
+
+\begin{DoxyReturn}{Returns}
+int for this Number Expression 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_expr}{Expr}}.
+
+\mbox{\Hypertarget{class_num_a9f4f1d071698589a8a73eb00ad37fa31}\label{class_num_a9f4f1d071698589a8a73eb00ad37fa31}} 
+\index{Num@{Num}!subst@{subst}}
+\index{subst@{subst}!Num@{Num}}
+\doxysubsubsection{\texorpdfstring{subst()}{subst()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_expr}{Expr}} $\ast$ Num\+::subst (\begin{DoxyParamCaption}\item[{std\+::string}]{str\+\_\+new,  }\item[{\mbox{\hyperlink{class_expr}{Expr}} $\ast$}]{e }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Everywhere that the expression (whose subst method is called) contains a variable matching the str\+\_\+new, the result Expr$\ast$ should have the given replacement, instead. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em str\+\_\+new} & first argument, the string to be replaced \\
+\hline
+{\em e} & second argument, the Expression replace str\+\_\+new \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Expr$\ast$ that after replacement 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_expr}{Expr}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/jinny/\+MSD/my6015\+Repo/expr.\+hpp\item 
+/\+Users/jinny/\+MSD/my6015\+Repo/\mbox{\hyperlink{expr_8cpp}{expr.\+cpp}}\end{DoxyCompactItemize}

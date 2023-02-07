@@ -1,0 +1,79 @@
+\begin{theindex}
+
+  \item {/Users/jinny/MSD/my6015Repo/cmdline.cpp}, \hyperpage{21}
+  \item {/Users/jinny/MSD/my6015Repo/expr.cpp}, \hyperpage{22}
+
+  \indexspace
+
+  \item {Add}, \hyperpage{9}
+    \subitem {equals}, \hyperpage{10}
+    \subitem {has\_variable}, \hyperpage{10}
+    \subitem {interp}, \hyperpage{10}
+    \subitem {subst}, \hyperpage{10}
+
+  \indexspace
+
+  \item {equals}
+    \subitem {Add}, \hyperpage{10}
+    \subitem {Expr}, \hyperpage{11}
+    \subitem {Mult}, \hyperpage{13}
+    \subitem {Num}, \hyperpage{15}
+    \subitem {Var}, \hyperpage{17}
+  \item {Expr}, \hyperpage{11}
+    \subitem {equals}, \hyperpage{11}
+    \subitem {has\_variable}, \hyperpage{11}
+    \subitem {interp}, \hyperpage{12}
+    \subitem {subst}, \hyperpage{12}
+
+  \indexspace
+
+  \item {has\_variable}
+    \subitem {Add}, \hyperpage{10}
+    \subitem {Expr}, \hyperpage{11}
+    \subitem {Mult}, \hyperpage{13}
+    \subitem {Num}, \hyperpage{15}
+    \subitem {Var}, \hyperpage{18}
+
+  \indexspace
+
+  \item {interp}
+    \subitem {Add}, \hyperpage{10}
+    \subitem {Expr}, \hyperpage{12}
+    \subitem {Mult}, \hyperpage{13}
+    \subitem {Num}, \hyperpage{16}
+    \subitem {Var}, \hyperpage{18}
+
+  \indexspace
+
+  \item {Mult}, \hyperpage{12}
+    \subitem {equals}, \hyperpage{13}
+    \subitem {has\_variable}, \hyperpage{13}
+    \subitem {interp}, \hyperpage{13}
+    \subitem {subst}, \hyperpage{14}
+
+  \indexspace
+
+  \item {Num}, \hyperpage{14}
+    \subitem {equals}, \hyperpage{15}
+    \subitem {has\_variable}, \hyperpage{15}
+    \subitem {interp}, \hyperpage{16}
+    \subitem {subst}, \hyperpage{16}
+
+  \indexspace
+
+  \item {subst}
+    \subitem {Add}, \hyperpage{10}
+    \subitem {Expr}, \hyperpage{12}
+    \subitem {Mult}, \hyperpage{14}
+    \subitem {Num}, \hyperpage{16}
+    \subitem {Var}, \hyperpage{18}
+
+  \indexspace
+
+  \item {Var}, \hyperpage{17}
+    \subitem {equals}, \hyperpage{17}
+    \subitem {has\_variable}, \hyperpage{18}
+    \subitem {interp}, \hyperpage{18}
+    \subitem {subst}, \hyperpage{18}
+
+\end{theindex}

@@ -1,9 +1,10 @@
-//
-//  cmdline.cpp
-//  HW1_MSDscriptCommandLine
-//
-//  Created by Jinny Jeng on 1/16/23.
-//
+/**
+* \file cmdline.cpp
+* \brief contains cmdline class definition
+*
+* execution for each command line argument
+* \author Jinny
+*/
 #define CATCH_CONFIG_RUNNER
 
 #include "cmdline.hpp"
