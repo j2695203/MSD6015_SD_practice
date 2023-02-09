@@ -12,15 +12,28 @@
 #include <string>
 #include <stdexcept>
 
+typedef enum {
+  prec_none,      // = 0
+  prec_add,       // = 1
+  prec_mult       // = 2
+} precedence_t;
+
+
 class Expr {
 public:
     virtual bool equals(Expr *e) = 0;
     virtual int interp() = 0;
     virtual bool has_variable() = 0;
     virtual Expr* subst(std::string str_new, Expr *e) = 0;
-//    virtual void print(std::ostream&) = 0;
-//    std::string to_string();
-//    virtual void pretty_print(std::ostream&) = 0;
+    
+    virtual void print(std::ostream&) = 0;
+    std::string to_string();
+
+    void pretty_print(std::ostream&); // driver
+    virtual void pretty_print_at(std::ostream&, precedence_t) = 0;
+    std::string pretty_print_to_string();
+    
+
 };
 
 class Num: public Expr {
@@ -31,8 +44,11 @@ public:
     int interp();
     bool has_variable();
     Expr* subst(std::string str_new, Expr *e);
-//    void print(std::ostream&);
-//    std::string to_string();
+    
+    void print(std::ostream&);
+    void pretty_print(std::ostream&);
+    void pretty_print_at(std::ostream&, precedence_t);
+    
 };
 
 
@@ -45,8 +61,10 @@ public:
     int interp();
     bool has_variable();
     Expr* subst(std::string str_new, Expr *e);
-//    void print(std::ostream&);
-//    std::string to_string();
+
+    void print(std::ostream&);
+    void pretty_print(std::ostream&);
+    void pretty_print_at(std::ostream&, precedence_t);
 };
 
 
@@ -59,8 +77,10 @@ public:
     int interp();
     bool has_variable();
     Expr* subst(std::string str_new, Expr *e);
-//    void print(std::ostream&);
-//    std::string to_string();
+    
+    void print(std::ostream&);
+    void pretty_print(std::ostream&);
+    void pretty_print_at(std::ostream&, precedence_t);
 };
 
 
@@ -72,8 +92,10 @@ public:
     int interp();
     bool has_variable();
     Expr* subst(std::string str_new, Expr *e);
-//    void print(std::ostream&);
-//    std::string to_string();
+
+    void print(std::ostream&);
+    void pretty_print(std::ostream&);
+    void pretty_print_at(std::ostream&, precedence_t);
 };
 
 

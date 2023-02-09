@@ -6,11 +6,46 @@
 * \author Jinny
 */
 
+#include <iostream>
+#include <sstream>
 #include "expr.hpp"
 #include "catch.h"
 
 /*
- Class Num
+ *** Class Expr ************************************************
+ */
+
+/**
+* \brief returning the str value of the output stream
+ */
+std::string Expr::to_string() {
+    std::stringstream st("");
+    this->print(st);
+    return st.str();
+}
+
+/**
+* \brief returning the str value of the pretty print function
+ */
+std::string Expr::pretty_print_to_string() {
+    std::stringstream st("");
+    this->pretty_print(st);
+    return st.str();
+}
+
+/**
+ *\brief call function to print the expression by passing ostream and precedence rules
+ */
+void Expr::pretty_print(std::ostream& ost){
+    precedence_t prec = prec_none; // for first time (driver)
+    pretty_print_at(ost, prec);
+}
+
+
+
+
+/*
+ *** Class Num ************************************************
  */
 
 
@@ -55,14 +90,29 @@ bool Num::has_variable(){
 Expr* Num::subst(std::string str_new, Expr *e){
     return ( new Num( this->val ) ); // don't need to substitute a number
 }
+/**
+ *\brief print expression with infix and parentheses
+ */
+void Num::print(std::ostream& ot){
+    ot<<std::to_string(val);
+}
 
-//void Num::print(std::ostream& ot){
-//    ot<<std::to_string(val);
-//}
+/**
+* \brief print the expression based on precedence rules
+* \param ost first argument
+* \param p second argument, the precedence of previous expression
+*/
+void Num::pretty_print_at(std::ostream& ost, precedence_t p){
+    ost<<std::to_string(val);
+}
+
+
+
 
 /*
- Class Add
+ *** Class Add ************************************************
  */
+
 
 Add::Add(Expr *lhs, Expr *rhs) {
     this->lhs = lhs;
@@ -106,11 +156,41 @@ bool Add::has_variable(){
 Expr* Add::subst(std::string str_new, Expr *e){
     return ( new Add( (lhs->subst(str_new, e)) , (rhs->subst(str_new, e))) ) ;
 }
+/**
+ *\brief print expression with infix and parentheses
+ */
+void Add::print(std::ostream& ot){
+    ot<<"(";
+    lhs->print(ot);
+    ot<<"+";
+    rhs->print(ot);
+    ot<<")";
+}
 
+/**
+* \brief print the expression based on precedence rules
+* \param ost first argument
+* \param p second argument, the precedence of previous expression
+*/
+void Add::pretty_print_at(std::ostream& ost, precedence_t p){
+
+    if(p > 1 ){ // if mul->add
+        ost<<"(";
+        lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_add+1)); // (operators associate to the right) lhs needs parentheses when it has same precedence, so + 1
+        ost<<" + ";
+        rhs->pretty_print_at(ost, prec_add);
+        ost<<")";
+    }else{
+        lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_add+1));
+        ost<<" + ";
+        rhs->pretty_print_at(ost, prec_add);
+    }
+
+}
 
 
 /*
-Class Mult
+ *** Class Mult ************************************************
  */
 
 Mult::Mult(Expr *lhs, Expr *rhs) {
@@ -155,10 +235,39 @@ bool Mult::has_variable(){
 Expr* Mult::subst(std::string str_new, Expr *e){
     return ( new Mult( (lhs->subst(str_new, e)) , (rhs->subst(str_new, e))) ) ;
 }
+/**
+ *\brief print expression with infix and parentheses
+ */
+void Mult::print(std::ostream& ot){
+    ot<<"(";
+    lhs->print(ot);
+    ot<<"*";
+    rhs->print(ot);
+    ot<<")";
+}
 
+/**
+* \brief print the expression based on precedence rules
+* \param ost first argument
+* \param p second argument, the precedence of previous expression
+*/
+void Mult::pretty_print_at(std::ostream& ost, precedence_t p){
+
+    if( p > 2 ){
+        ost<<"(";
+        lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_mult+1));
+        ost<<" * ";
+        rhs->pretty_print_at(ost, prec_mult);
+        ost<<")";
+    }else{
+        lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_mult+1));
+        ost<<" * ";
+        rhs->pretty_print_at(ost, prec_mult);
+    }
+}
 
 /*
- Class Var (variable)
+ *** Class Var (variable) ************************************************
  */
 
 Var::Var(std::string str) {
@@ -207,8 +316,23 @@ Expr* Var::subst(std::string str_new, Expr *e){
     }
 }
 
+void Var::print(std::ostream& ot){
+    ot<<str;
+}
+
+void Var::pretty_print(std::ostream& ost){
+    precedence_t prec = prec_none;
+    pretty_print_at(ost, prec);
+}
+
+void Var::pretty_print_at(std::ostream& ost, precedence_t p){
+    ost<<str;
+}
+
+
+
 /*
- TEST using Catch 2 framework
+ *** TEST using Catch 2 framework ************************************************
  */
 
 TEST_CASE("Test_Equal_Within_Same_Class"){
@@ -280,6 +404,11 @@ TEST_CASE("Test_Equal_Not_Same_Class"){
         Add* add = new Add( new Num(3), new Num(0) );
         Mult* mult = new Mult ( new Num(3), new Num(0) );
         CHECK_FALSE( add -> equals(mult) );
+    }
+    
+    SECTION("null"){
+        CHECK_FALSE( (new Add( new Num(3), new Num(0))) -> equals(NULL) );
+        CHECK_FALSE( (new Mult( new Num(3), new Num(0))) -> equals(NULL) );
     }
 }
 
@@ -365,6 +494,90 @@ TEST_CASE("Test_subst()"){
         CHECK( (new Var("original"))->subst("original", new Var("new"))->equals(new Var("new")) );
         // didn't substitute
         CHECK( (new Var("original"))->subst("no_match", new Var("new"))->equals(new Var("original")) );
+    }
+}
+
+TEST_CASE("Test_toString (includes print)"){
+    SECTION("expr_number"){
+        CHECK( (new Num(10))->to_string() == "10" );
+    }
+    SECTION("expr_add"){
+        CHECK( (new Add( new Num(2), new Num(3)))->to_string() == "(2+3)" );
+        CHECK( (new Add( new Num(-2), new Num(-3)))->to_string() == "(-2+-3)" );
+        CHECK( (new Add( (new Add( new Num(1), new Num(2))), new Num(3) ) )->to_string() == "((1+2)+3)" );
+        CHECK( (new Add( new Num(1), (new Add( new Num(2), new Num(3))) ) )->to_string() == "(1+(2+3))" );
+        CHECK( (new Add( new Var("cat"), (new Add( new Num(1), new Num(2))) ) )->to_string() == "(cat+(1+2))" );
+    }
+    SECTION("expr_mult"){
+        CHECK( (new Mult( new Num(10), new Num(3)))->to_string() == "(10*3)" );
+    }
+    SECTION("expr_var"){
+        CHECK( (new Var("cat"))->to_string() == "cat" );
+    }
+}
+
+
+TEST_CASE("Test_pretty_print_to_string (includes pretty_print)"){
+        
+    SECTION("expr_add_only"){
+        
+        // test (1 + 2) + 3
+        CHECK( ( new Add( new Add(new Num(1),new Num(2)) , new Num(3) ) )
+              ->pretty_print_to_string() == "(1 + 2) + 3" );
+        // test 1 + (2 + 3)
+        CHECK( ( new Add( new Num(1) , new Add(new Num(2),new Num(3)) ) )
+              ->pretty_print_to_string() == "1 + 2 + 3" );
+        // test 1 + (2 + (3 + (4 + 5)))
+        CHECK( ( new Add( new Num(1) , new Add( new Num(2) , new Add( new Num(3) , new Add(new Num(4),new Num(5))))))
+              ->pretty_print_to_string() == "1 + 2 + 3 + 4 + 5");
+        // test 1 + (((2 + 3) + 4) + 5)
+        CHECK( ( new Add( new Num(1) , new Add( new Add( new Add( new Num(2) , new Num(3)) , new Num(4)) , new Num(5))))
+              ->pretty_print_to_string() == "1 + ((2 + 3) + 4) + 5");
+    }
+    
+    SECTION("expr_mult_only"){
+        
+        // test (1 * 2) * 3
+        CHECK( ( new Mult( new Mult(new Num(1),new Num(2)) , new Num(3) ) )
+              ->pretty_print_to_string() == "(1 * 2) * 3" );
+        // test 1 + (2 + 3)
+        CHECK( ( new Mult( new Num(1) , new Mult(new Num(2),new Num(3)) ) )
+              ->pretty_print_to_string() == "1 * 2 * 3" );
+        // test 1 + (2 + (3 + (4 + 5)))
+        CHECK( ( new Mult( new Num(1) , new Mult( new Num(2) , new Mult( new Num(3) , new Mult(new Num(4),new Num(5))))))
+              ->pretty_print_to_string() == "1 * 2 * 3 * 4 * 5");
+        // test 1 + (((2 + 3) + 4) + 5)
+        CHECK( ( new Mult( new Num(1) , new Mult( new Mult( new Mult( new Num(2) , new Num(3)) , new Num(4)) , new Num(5))))
+              ->pretty_print_to_string() == "1 * ((2 * 3) * 4) * 5");
+        // test (10 * ((10 * 10) * 10)) * (10 * 10)
+        CHECK((new Mult( new Mult(new Num(10), new Mult(new Mult(new Num(10), new Num(10)), new Num(10))), new Mult(new Num(10), new Num(10))))
+              ->pretty_print_to_string()  == "(10 * (10 * 10) * 10) * 10 * 10");
+    }
+    
+    SECTION("expr_add_mult_mix"){
+        
+        // test 1 + (2 * 3)
+        CHECK( ( new Add( new Num(1) , new Mult(new Num(2),new Num(3)) ) )
+              ->pretty_print_to_string() == "1 + 2 * 3" );
+        // test (1 * 2) + 3
+        CHECK( ( new Add( new Mult(new Num(1),new Num(2)) , new Num(3) ) )
+              ->pretty_print_to_string() == "1 * 2 + 3");
+        // test 1 * (2 + 3)
+        CHECK( ( new Mult( new Num(1) , new Add(new Num(2),new Num(3)) ) )
+              ->pretty_print_to_string() == "1 * (2 + 3)");
+        // test (9 * (4 + 3)) + ((2 * 4) + 1)
+        CHECK((new Add(new Mult(new Num(9), new Add(new Num(4), new Num(3))), new Add(new Mult(new Num(2), new Num(4)), new Num(1))))
+              ->pretty_print_to_string() == "9 * (4 + 3) + 2 * 4 + 1");
+    }
+    
+    SECTION("expr_number"){
+        CHECK(( new Num(3) )-> pretty_print_to_string() == "3");
+        CHECK(( new Num(-3) )-> pretty_print_to_string() == "-3");
+    }
+    
+    SECTION("expr_var"){
+        CHECK(( new Var("3") )-> pretty_print_to_string() == "3");
+        CHECK(( new Var("variable") )-> pretty_print_to_string() == "variable");
     }
     
 }
