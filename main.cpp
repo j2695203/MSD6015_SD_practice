@@ -23,6 +23,14 @@ int main(int argc, const char * argv[]) {
     
     use_arguments(argc, argv);
     
+    (new Let("x", new Num(5), new Add(new Var("x"), new Num(1))) )->print(std::cout);
+    
+    std::cout<<std::endl;
+    
+    std::cout<< (new Let("x", new Num(5), new Add(new Var("x"), new Num(1))) )->interp();
+    
+    std::cout<<std::endl;
+    
     return 0;;
     
 }

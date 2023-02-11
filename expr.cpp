@@ -330,10 +330,152 @@ void Var::pretty_print_at(std::ostream& ost, precedence_t p){
 }
 
 
+/*
+ *** Class Let ************************************************
+ */
+
+Let::Let(std::string str, Expr *rhs, Expr *body) {
+    this->str = str;
+    this->rhs = rhs;
+    this->body = body;
+}
+
+/**
+* \brief Compare if two Expressions are the same type with same arguments
+* \param e first argument,the Expression to be compared
+* \return bool if the Expression to be compared is a Let Expression with same arguments
+*/
+bool Let::equals(Expr* e){
+    Let* n = dynamic_cast<Let*>(e);
+    if(n == NULL){
+        return false;
+    }else{
+        return( this->str == (n->str) && this->rhs->equals(n->rhs) && this->body->equals(n->body) );
+    }
+}
+
+/**
+* \brief Calculate the product of the subexpression values
+* \return int for this Mult Expression
+*/
+int Let::interp(){
+    
+    // rhs calculate first if they're all numbers                     // how about x + 7 + 5 ?????
+    if(!rhs->has_variable()){
+        rhs = new Num(rhs->interp());
+    }
+    
+    return body->subst(str,rhs)->interp();
+}
+
+/**
+* \brief Check if the Let expression is a variable or contains a variable.
+* \return bool if the Let expression is a variable or contains a variable.
+*/
+bool Let::has_variable(){
+    return( rhs->has_variable() || body->has_variable() );
+}
+
+/**
+* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
+* \param str_new first argument, the string to be replaced
+* \param e second argument, the Expression replace str_new
+* \return Expr* that after replacement
+*/
+Expr* Let::subst(std::string str_new, Expr *e){
+    // always substitute in the right-hand side
+    // bind different〈variable〉: substitute in the body
+    // bind same〈variable〉: don’t substitute in the body
+    
+    if( str != str_new ){
+        return ( new Let(str, rhs->subst(str_new, e), body->subst(str_new, e)) );
+    }else{
+        return ( new Let(str, rhs->subst(str_new, e), body->subst(str, rhs->subst(str_new, e))) );
+    }
+}
+
+/**
+ *\brief print expression with infix and parentheses
+ */
+void Let::print(std::ostream& ot){
+    ot<<"(_let "<<str<<"=";
+    rhs->print(ot);
+    ot<<" _in ";
+    body->print(ot);
+    ot<<")";
+}
+
+/**
+* \brief print the expression based on precedence rules
+* \param ost first argument
+* \param p second argument, the precedence of previous expression
+*/
+void Let::pretty_print_at(std::ostream& ost, precedence_t p){
+
+}
+
+
 
 /*
  *** TEST using Catch 2 framework ************************************************
  */
+
+TEST_CASE("Let_all methods"){
+    SECTION("toString (includes print)"){
+        CHECK((new Let("x", new Num(5), new Add(new Var("x"), new Num(1))) )
+              ->to_string() == "(_let x=5 _in (x+1))");
+        CHECK((new Let("x", new Add(new Num(5), new Num(2)) , new Add(new Var("x"), new Num(1))) )
+              ->to_string() == "(_let x=(5+2) _in (x+1))");
+        CHECK( (new Let("x", new Num(5), new Let("x", new Num(6), new Add(new Var("x"), new Num(1)))))
+              ->to_string() == "(_let x=5 _in (_let x=6 _in (x+1)))" );
+        CHECK( (new Let("x", new Num(5), new Let("y", new Num(6), new Add(new Var("x"), new Num(1)))))
+              ->to_string() == "(_let x=5 _in (_let y=6 _in (x+1)))" );
+        CHECK( (new Let("x", new Num(5), new Let("x", new Add(new Var("x"),new Num(2)) , new Add(new Var("x"), new Num(1)))))
+              ->to_string() == "(_let x=5 _in (_let x=(x+2) _in (x+1)))" );
+        CHECK( (new Let("x", new Num(5), new Add(new Let("y", new Num(3), new Add(new Var("y"), new Num(2))), new Var("x"))))
+              ->to_string() == "(_let x=5 _in ((_let y=3 _in (y+2))+x))" );
+    }
+    SECTION("interp"){
+        CHECK((new Let("x", new Num(5), new Add(new Var("x"), new Num(1))) )
+              ->interp() == 6);
+        CHECK((new Let("x", new Add(new Num(5), new Num(2)) , new Add(new Var("x"), new Num(1))) )
+              ->interp() == 8);
+        CHECK( (new Let("x", new Num(5), new Let("x", new Num(6), new Add(new Var("x"), new Num(1)))))
+              ->interp() == 7 );
+        CHECK( (new Let("x", new Num(5), new Let("y", new Num(6), new Add(new Var("x"), new Num(1)))))
+              ->interp() == 6 );
+        CHECK( (new Let("x", new Num(5), new Let("x", new Add(new Var("x"),new Num(2)) , new Add(new Var("x"), new Num(1)))))
+              ->interp() == 8 );
+        CHECK( (new Let("x", new Num(5), new Add(new Let("y", new Num(3), new Add(new Var("y"), new Num(2))), new Var("x"))))
+              ->interp() == 10 );
+    }
+    SECTION("equal"){
+        CHECK((new Let("x", new Num(5), new Add(new Var("x"), new Num(1))) )
+              ->equals(new Let("x", new Num(5), new Add(new Var("x"), new Num(1)))));
+        CHECK_FALSE((new Let("x", new Num(5), new Add(new Var("x"), new Num(1))) )
+                    ->equals(new Let("y", new Num(5), new Add(new Var("x"), new Num(1)))));
+        CHECK_FALSE((new Let("x", new Num(5), new Add(new Var("x"), new Num(1))) )
+                    ->equals(new Add(new Num(5), new Add(new Var("x"), new Num(1)))));
+    }
+    SECTION("has_variable"){
+        CHECK((new Let("x", new Num(5), new Add(new Var("x"), new Num(1))) )
+              ->has_variable());
+        CHECK((new Let("x", new Add(new Var("x"),new Num(2)) , new Add(new Num(3), new Num(1))))
+              ->has_variable());
+        CHECK_FALSE((new Let("x", new Num(5) , new Add(new Num(3), new Num(1))))
+              ->has_variable());
+    }
+    SECTION("subst"){
+        CHECK( (new Let("x", new Num(5), new Add(new Var("x"), new Num(1))))
+              ->subst("x", new Num(10))->interp() == 6 );
+        CHECK( (new Let("y", new Num(5), new Add(new Var("x"), new Num(1))))
+              ->subst("x", new Num(10))->interp() == 11 );
+    }
+}
+
+//TEST_CASE("Test_pretty_print_to_string (includes pretty_print)"){
+//
+//}
 
 TEST_CASE("Test_Equal_Within_Same_Class"){
     

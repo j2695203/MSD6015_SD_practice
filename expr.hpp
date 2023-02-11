@@ -99,6 +99,20 @@ public:
 };
 
 
-
+class Let: public Expr {
+public:
+    std::string str; //!<  left-hand-side string of the let expression
+    Expr *rhs; //!<  right-hand-side expression of the let expression
+    Expr *body; // body expression of the let expression
+    Let(std::string str, Expr *rhs, Expr *body);
+    bool equals(Expr *e);
+    int interp();
+    bool has_variable();
+    Expr* subst(std::string str_new, Expr *e);
+    
+    void print(std::ostream&);
+    void pretty_print(std::ostream&);
+    void pretty_print_at(std::ostream&, precedence_t);
+};
 
 #endif /* expr_hpp */
