@@ -38,7 +38,7 @@ std::string Expr::pretty_print_to_string() {
  */
 void Expr::pretty_print(std::ostream& ost){
     precedence_t prec = prec_none; // for first time (driver)
-    pretty_print_at(ost, prec);
+    pretty_print_at(ost, prec, 0, ost.tellp());
 }
 
 
@@ -102,7 +102,7 @@ void Num::print(std::ostream& ot){
 * \param ost first argument
 * \param p second argument, the precedence of previous expression
 */
-void Num::pretty_print_at(std::ostream& ost, precedence_t p){
+void Num::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long pos){
     ost<<std::to_string(val);
 }
 
@@ -172,19 +172,21 @@ void Add::print(std::ostream& ot){
 * \param ost first argument
 * \param p second argument, the precedence of previous expression
 */
-void Add::pretty_print_at(std::ostream& ost, precedence_t p){
+void Add::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long pos){
 
+    // left parentheses
     if(p > 1 ){ // if mul->add
         ost<<"(";
-        lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_add+1)); // (operators associate to the right) lhs needs parentheses when it has same precedence, so + 1
+        lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_add+1), acc+1, ost.tellp());
         ost<<" + ";
-        rhs->pretty_print_at(ost, prec_add);
+        rhs->pretty_print_at(ost, prec_add, 0, ost.tellp());
         ost<<")";
     }else{
-        lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_add+1));
+        lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_add+1), acc+1, pos);
         ost<<" + ";
-        rhs->pretty_print_at(ost, prec_add);
+        rhs->pretty_print_at(ost, prec_add, acc, ost.tellp());
     }
+    
 
 }
 
@@ -251,19 +253,21 @@ void Mult::print(std::ostream& ot){
 * \param ost first argument
 * \param p second argument, the precedence of previous expression
 */
-void Mult::pretty_print_at(std::ostream& ost, precedence_t p){
+void Mult::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long pos){
 
+    // left parentheses
     if( p > 2 ){
         ost<<"(";
-        lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_mult+1));
+        lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_mult+1), acc+1, ost.tellp());
         ost<<" * ";
-        rhs->pretty_print_at(ost, prec_mult);
+        rhs->pretty_print_at(ost, prec_mult, 0, ost.tellp());
         ost<<")";
     }else{
-        lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_mult+1));
+        lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_mult+1), acc+1, pos);
         ost<<" * ";
-        rhs->pretty_print_at(ost, prec_mult);
+        rhs->pretty_print_at(ost, prec_mult, acc, ost.tellp());
     }
+    
 }
 
 /*
@@ -320,12 +324,8 @@ void Var::print(std::ostream& ot){
     ot<<str;
 }
 
-void Var::pretty_print(std::ostream& ost){
-    precedence_t prec = prec_none;
-    pretty_print_at(ost, prec);
-}
 
-void Var::pretty_print_at(std::ostream& ost, precedence_t p){
+void Var::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long pos){
     ost<<str;
 }
 
@@ -410,7 +410,37 @@ void Let::print(std::ostream& ot){
 * \param ost first argument
 * \param p second argument, the precedence of previous expression
 */
-void Let::pretty_print_at(std::ostream& ost, precedence_t p){
+void Let::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long space_bf_LetExpr){
+    
+    long thisBlank = space_bf_LetExpr;
+    
+    if(p > 1 && acc > 0){ // mult->let or add->let  , and not the rightest expression
+        ost<<"(";
+        thisBlank += 1;
+    }
+    
+    // _let
+    ost<<"_let "<<str<<" = ";
+    rhs->pretty_print_at(ost, prec_none, acc, 0);
+    
+    // new line
+    ost<< "\n";
+    long posLineStart = ost.tellp();
+    
+    // blank
+    for(int i = 0; i < thisBlank ; i++){
+        ost<< " ";
+    }
+    
+    // _in
+    ost<< "_in ";
+    long afterIn = ost.tellp();
+    body->pretty_print_at(ost, prec_none, acc, (afterIn - posLineStart) + (thisBlank-space_bf_LetExpr) );
+    
+    
+    if(p > 1 && acc > 0){ // mult->let or add->let
+        ost<<")";
+    }
 
 }
 
@@ -419,6 +449,48 @@ void Let::pretty_print_at(std::ostream& ost, precedence_t p){
 /*
  *** TEST using Catch 2 framework ************************************************
  */
+TEST_CASE("Let_pretty_print_to_string (includes pretty_print)"){
+    
+    SECTION("nested"){
+//        CHECK(( new Let("x", new Num(5), new Let("x", new Num(3), new Add(new Var("x"), new Num(1)))) )
+//              ->pretty_print_to_string() == "_let x = 5"      "\n"
+//                                         "_in _let x = 3"   "\n"
+//                                         "    _in x + 1");
+        CHECK(( new Let("x", new Num(5), new Add(new Let("x", new Num(3), new Add(new Var("x"), new Num(1))), new Num(2)) ) )
+              ->pretty_print_to_string() == "_let x = 5"      "\n"
+                                         "_in (_let x = 3"   "\n"
+                                         "     _in x + 1) + 2");
+        
+//        CHECK(( new Let("x", new Num(5), new Add(new Num(2), new Let("x", new Num(3), new Add(new Var("x"), new Num(1))) ) ) )
+//              ->pretty_print_to_string() == "_let x = 5"      "\n"
+//                                         "_in 2 + _let x = 3"   "\n"
+//                                         "        _in x + 1");
+    }
+    SECTION("let in middle"){
+        CHECK((new Add (new Mult( new Num(5), new Let("x",new Num(5), new Var("x"))) , new Num(2)))
+              ->pretty_print_to_string() == "5 * (_let x = 5"   "\n"
+                                         "     _in x) + 2");
+        CHECK((new Mult (new Mult( new Num(5), new Let("x",new Num(5), new Var("x"))) , new Num(2)))
+              ->pretty_print_to_string() == "(5 * _let x = 5"   "\n"
+                                         "     _in x) * 2");
+        CHECK((new Mult (new Add( new Num(5), new Let("x",new Num(5), new Var("x"))) , new Num(2)))
+              ->pretty_print_to_string() == "(5 + _let x = 5"   "\n"
+                                         "     _in x) * 2");
+        CHECK((new Mult (new Add(new Let("x",new Num(5), new Var("x")), new Num(5)) , new Num(2)))
+              ->pretty_print_to_string() == "((_let x = 5"   "\n"
+                                         "  _in x) + 5) * 2");
+    }
+    SECTION("let in left"){
+        CHECK((new Add (new Let("x",new Num(5), new Var("x")) , new Num(1)))
+              ->pretty_print_to_string() == "(_let x = 5"    "\n"
+                                         " _in x) + 1");
+        CHECK((new Mult( new Num(5), new Let("x",new Num(5), new Add(new Var("x"),new Num(1)))))
+              ->pretty_print_to_string() == "5 * _let x = 5"   "\n"
+                                         "    _in x + 1");
+    }
+
+}
+
 
 TEST_CASE("Let_all methods"){
     SECTION("toString (includes print)"){
@@ -473,9 +545,7 @@ TEST_CASE("Let_all methods"){
     }
 }
 
-//TEST_CASE("Test_pretty_print_to_string (includes pretty_print)"){
-//
-//}
+
 
 TEST_CASE("Test_Equal_Within_Same_Class"){
     

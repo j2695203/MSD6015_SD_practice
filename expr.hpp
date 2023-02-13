@@ -30,7 +30,7 @@ public:
     std::string to_string();
 
     void pretty_print(std::ostream&); // driver
-    virtual void pretty_print_at(std::ostream&, precedence_t) = 0;
+    virtual void pretty_print_at(std::ostream&, precedence_t, int, long) = 0;
     std::string pretty_print_to_string();
     
 
@@ -47,7 +47,7 @@ public:
     
     void print(std::ostream&);
     void pretty_print(std::ostream&);
-    void pretty_print_at(std::ostream&, precedence_t);
+    void pretty_print_at(std::ostream&, precedence_t, int, long);
     
 };
 
@@ -64,7 +64,7 @@ public:
 
     void print(std::ostream&);
     void pretty_print(std::ostream&);
-    void pretty_print_at(std::ostream&, precedence_t);
+    void pretty_print_at(std::ostream&, precedence_t, int, long);
 };
 
 
@@ -80,7 +80,7 @@ public:
     
     void print(std::ostream&);
     void pretty_print(std::ostream&);
-    void pretty_print_at(std::ostream&, precedence_t);
+    void pretty_print_at(std::ostream&, precedence_t, int, long);
 };
 
 
@@ -95,7 +95,7 @@ public:
 
     void print(std::ostream&);
     void pretty_print(std::ostream&);
-    void pretty_print_at(std::ostream&, precedence_t);
+    void pretty_print_at(std::ostream&, precedence_t, int, long);
 };
 
 
@@ -112,7 +112,7 @@ public:
     
     void print(std::ostream&);
     void pretty_print(std::ostream&);
-    void pretty_print_at(std::ostream&, precedence_t);
+    void pretty_print_at(std::ostream&, precedence_t, int, long);
 };
 
 #endif /* expr_hpp */
