@@ -32,6 +32,7 @@ TEST_CASE("parse") {
   CHECK( parse_str("xyz")->equals(new Var("xyz")) );
   CHECK( parse_str("xYz")->equals(new Var("xYz")) );
   CHECK_THROWS_WITH( parse_str("x_z"), "invalid input" );
+  CHECK_THROWS_WITH( parse_str("x z"), "invalid input" );
   
   CHECK( parse_str("x + y")->equals(new Add(new Var("x"), new Var("y"))) );
 
@@ -44,7 +45,18 @@ TEST_CASE("parse") {
   CHECK( parse_str("z * (x + y)")
         ->equals(new Mult(new Var("z"),
                           new Add(new Var("x"), new Var("y"))) ));
-
+    
+    
+    CHECK_THROWS_WITH( parse_str("x 2"), "invalid input");
+    CHECK( parse_str("(_let x = 2 _in x ) + 2")->equals(new Add(new Let("x", new Num(2), new Var("x")), new Num(2))) );
+    CHECK( parse_str("(_let x = 2 _in x )")->equals(new Let("x", new Num(2), new Var("x"))) );
+    CHECK( parse_str("_let x = 2 _in x")->equals(new Let("x", new Num(2), new Var("x"))) );
+    CHECK_THROWS_WITH( parse_str("_let x = 2 y _in x"), "invalid input");
+    CHECK_THROWS_WITH(parse_str("_2let x = 2 _in x"), "consume mismatch");
+    CHECK_THROWS_WITH( parse_str("_let x y = 2 _in x"), "invalid input");
+    CHECK_THROWS_WITH( parse_str("_let x  = 2  in x"), "invalid input");
+    CHECK_THROWS_WITH( parse_str("_let 1 = 2  in x"), "invalid input");
+    
 }
 
 

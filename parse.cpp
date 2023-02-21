@@ -107,6 +107,8 @@ Expr* parse_addend(std::istream &in){
         consume(in, c);
         Expr* rhs = parse_addend(in);
         return new Mult(e, rhs);
+    }else if( (c >= 32 && c <= 126) && c != '+' && c != ')' && c != '_' ){ // no other character
+        throw std::runtime_error("invalid input");
     }else{
         return e;
     }
@@ -131,7 +133,7 @@ Expr* parse_multicand(std::istream &in){  // = expr
             throw std::runtime_error("missing close parenthesis");
         }
         return e;
-    }else if( isalnum(c) ){
+    }else if( isalpha(c) ){
         return parse_var(in);
     }else if( c == '_' ){
         return parse_let(in);
@@ -158,7 +160,7 @@ Expr* parse_let(std::istream &in){
         std::string str;
         c = in.peek();
         if( !isalpha(c) ){
-            throw std::runtime_error("invalid input for let <variable>");
+            throw std::runtime_error("invalid input");
         }
         while(1){
             c = in.peek();
@@ -174,7 +176,7 @@ Expr* parse_let(std::istream &in){
         // "="
         c = in.get();
         if( c != '=' ){
-            throw std::runtime_error("invalid input for let '=' ");
+            throw std::runtime_error("invalid input");
         }
         skip_whitespace(in);
         
@@ -184,8 +186,8 @@ Expr* parse_let(std::istream &in){
         
         // "_in"
         c = in.get();
-        if( c != '_' ){
-            throw std::runtime_error("invalid input for let '_in' ");
+        if( c != '_' ){ // (rhs will deals with it first, so never enter this)
+            throw std::runtime_error("invalid input");
         }
         consume(in, 'i');
         consume(in, 'n');
@@ -197,7 +199,7 @@ Expr* parse_let(std::istream &in){
         // return let expression
         return new Let(str, rhs, body);
         
-    }else{
+    }else{ // (multicand will check if it's _let first, so never enter this)
         consume(in, c);
         throw std::runtime_error("invalid input");
     }
@@ -205,7 +207,7 @@ Expr* parse_let(std::istream &in){
 
 // for test
 Expr* parse_str(std::string str){
-    
+    // put the test string into stream
     std::istringstream in(str) ;
     Expr* e = parse_addend(in);
     
