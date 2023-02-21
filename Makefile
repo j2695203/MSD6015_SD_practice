@@ -8,9 +8,9 @@
 # clean - delete derived files from make
 
 
-CXXSOURCE = main.cpp cmdline.cpp expr.cpp
+CXXSOURCE = main.cpp cmdline.cpp expr.cpp parse.cpp tests.cpp
 
-HEADERS = cmdline.hpp expr.hpp catch.h
+HEADERS = cmdline.hpp expr.hpp catch.h parse.hpp
 
 CXXFLAGS = -std=c++11
 
@@ -35,3 +35,4 @@ test: msdscript
 
 doc:
 	cd documentation && doxygen
+

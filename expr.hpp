@@ -12,6 +12,7 @@
 #include <string>
 #include <stdexcept>
 
+
 typedef enum {
   prec_none,      // = 0
   prec_add,       // = 1
@@ -33,6 +34,12 @@ public:
     virtual void pretty_print_at(std::ostream&, precedence_t, int, long) = 0;
     std::string pretty_print_to_string();
     
+    Expr* parse_expr(std::istream &in);
+    Expr* parse_addend(std::istream &in);
+    Expr* parse_multicand(std::istream &in);
+    Expr* parse_num(std::istream &in);
+    Expr* parse_var(std::istream &in);
+    Expr* parse_let(std::istream &in);
 
 };
 
@@ -114,5 +121,7 @@ public:
     void pretty_print(std::ostream&);
     void pretty_print_at(std::ostream&, precedence_t, int, long);
 };
+
+
 
 #endif /* expr_hpp */

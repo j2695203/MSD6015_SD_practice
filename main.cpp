@@ -14,15 +14,37 @@
 #include <iostream>
 #include "expr.hpp"
 #include "cmdline.hpp"
+#include "parse.hpp"
 #include <cassert>
 
 #include "catch.h"
 
 
-int main(int argc, const char * argv[]) {
+int main(int argc, const char ** argv) {
     
-    use_arguments(argc, argv);
+    run_mode_t runmode = use_arguments(argc, argv);
     
-    return 0;;
+    switch(runmode){
+            
+        case do_nothing:
+            break;
+            
+        case do_interp:
+            std::cout << "Value: " << parse_expr(std::cin)->interp() << "\n";
+            exit(0);
+            
+        case do_print:
+            std::cout << "Expression: ";
+            parse_expr(std::cin)->print(std::cout);
+            std::cout << "\n";
+            exit(0);
+            
+        case do_pretty_print:
+            std::cout << "Expression: \n" << parse_expr(std::cin)->pretty_print_to_string() << "\n";
+            exit(0);
+    }
+    
+    
+    return 0;
     
 }
