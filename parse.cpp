@@ -41,7 +41,7 @@ Expr* parse_num(std::istream &in){
     // check is a digit after -
     int c = in.peek();
     if( !isdigit(c) ){
-        throw std::runtime_error("invalid input");
+        throw std::runtime_error("invalid input1");
     }
     
     // read digit number
@@ -74,7 +74,7 @@ Expr* parse_var(std::istream &in){
             consume(in, c);
             s += c;
         }else if( c == '_' ){ // should not allow immediate _let
-            throw std::runtime_error("invalid input");
+            throw std::runtime_error("invalid input2");
         }else{
             break;
         }
@@ -108,7 +108,7 @@ Expr* parse_addend(std::istream &in){
         Expr* rhs = parse_addend(in);
         return new Mult(e, rhs);
     }else if( (c >= 32 && c <= 126) && c != '+' && c != ')' && c != '_' ){ // no other character
-        throw std::runtime_error("invalid input");
+        throw std::runtime_error("invalid input3");
     }else{
         return e;
     }
@@ -139,7 +139,7 @@ Expr* parse_multicand(std::istream &in){  // = expr
         return parse_let(in);
     }else{
         consume(in, c);
-        throw std::runtime_error("invalid input");
+        throw std::runtime_error("invalid input4");
     }
 }
 
@@ -160,7 +160,7 @@ Expr* parse_let(std::istream &in){
         std::string str;
         c = in.peek();
         if( !isalpha(c) ){
-            throw std::runtime_error("invalid input");
+            throw std::runtime_error("invalid input5");
         }
         while(1){
             c = in.peek();
@@ -176,7 +176,7 @@ Expr* parse_let(std::istream &in){
         // "="
         c = in.get();
         if( c != '=' ){
-            throw std::runtime_error("invalid input");
+            throw std::runtime_error("invalid input6");
         }
         skip_whitespace(in);
         
@@ -187,7 +187,7 @@ Expr* parse_let(std::istream &in){
         // "_in"
         c = in.get();
         if( c != '_' ){ // (rhs will deals with it first, so never enter this)
-            throw std::runtime_error("invalid input");
+            throw std::runtime_error("invalid input7");
         }
         consume(in, 'i');
         consume(in, 'n');
@@ -201,7 +201,7 @@ Expr* parse_let(std::istream &in){
         
     }else{ // (multicand will check if it's _let first, so never enter this)
         consume(in, c);
-        throw std::runtime_error("invalid input");
+        throw std::runtime_error("invalid input8");
     }
 }
 

@@ -22,29 +22,39 @@
 
 int main(int argc, const char ** argv) {
     
-    run_mode_t runmode = use_arguments(argc, argv);
-    
-    switch(runmode){
-            
-        case do_nothing:
-            break;
-            
-        case do_interp:
-            std::cout << "Value: " << parse_expr(std::cin)->interp() << "\n";
-            exit(0);
-            
-        case do_print:
-            std::cout << "Expression: ";
-            parse_expr(std::cin)->print(std::cout);
-            std::cout << "\n";
-            exit(0);
-            
-        case do_pretty_print:
-            std::cout << "Expression: \n" << parse_expr(std::cin)->pretty_print_to_string() << "\n";
-            exit(0);
+    try{
+        run_mode_t runmode = use_arguments(argc, argv);
+        
+        switch(runmode){
+                
+            case do_nothing:
+                break;
+                
+            case do_interp:
+//                std::cout << "Value: " << parse_expr(std::cin)->interp() << "\n";
+                std::cout << parse_expr(std::cin)->interp() << "\n";
+                exit(0);
+                
+            case do_print:
+//                std::cout << "Expression: ";
+                parse_expr(std::cin)->print(std::cout);
+                std::cout << "\n";
+                exit(0);
+                
+            case do_pretty_print:
+//                std::cout << "Expression: \n" << parse_expr(std::cin)->pretty_print_to_string() << "\n";
+                std::cout << parse_expr(std::cin)->pretty_print_to_string() << "\n";
+                exit(0);
+        }
+        
+        
+        return 0;
+        
+    }catch( std::runtime_error exn){
+        
+        std::cerr << exn.what() << "\n";
+        return 1;
     }
-    
-    
-    return 0;
-    
 }
+
+

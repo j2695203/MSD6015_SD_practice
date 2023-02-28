@@ -421,7 +421,7 @@ void Let::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long lastL
     
     // _let
     ost<<"_let "<<str<<" = ";
-    rhs->pretty_print_at(ost, prec_none, acc, 0);
+    rhs->pretty_print_at(ost, prec_none, acc, lastLinePos);
     
     // new line
     ost<< "\n";
@@ -440,7 +440,7 @@ void Let::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long lastL
     body->pretty_print_at(ost, prec_none, acc, newLinePos );
     
     
-    if(p > 1 && acc > 0){ // mult->let or add->let
+    if(p > 1 && acc > 0){ // mult->let or add->let         ???????????? >1
         ost<<")";
     }
 
