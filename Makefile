@@ -8,10 +8,10 @@
 # clean - delete derived files from make
 
 
-CXXSOURCE = main.cpp cmdline.cpp expr.cpp parse.cpp tests.cpp
+CXXSOURCE = main.cpp cmdline.cpp expr.cpp val.cpp parse.cpp tests.cpp
 CXXSOURCE_test = testDriver.cpp exec.cpp
 
-HEADERS = cmdline.hpp expr.hpp catch.h parse.hpp
+HEADERS = cmdline.hpp expr.hpp val.hpp catch.h parse.hpp
 HEADERS_test = testDriver.hpp exec.h
 
 CXXFLAGS = -std=c++11
@@ -30,7 +30,7 @@ test_msdscript: $(CXXSOURCE_test) $(HEADERS)
 .PHONY: clean
 
 clean:
-	rm -f *.o msdscript
+	rm -f *.o msdscript test_msdscript
 
 .PHONY: test
 

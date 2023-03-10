@@ -19,11 +19,12 @@ typedef enum {
   prec_mult       // = 2
 } precedence_t;
 
+class Val;
 
 class Expr {
 public:
     virtual bool equals(Expr *e) = 0;
-    virtual int interp() = 0;
+    virtual Val* interp() = 0;
     virtual bool has_variable() = 0;
     virtual Expr* subst(std::string str_new, Expr *e) = 0;
     
@@ -43,12 +44,12 @@ public:
 
 };
 
-class Num: public Expr {
+class NumExpr: public Expr {
 public:
     int val;//!< integer value of the Number expression
-    Num(int val);
+    NumExpr(int val);
     bool equals(Expr *e);
-    int interp();
+    Val* interp();
     bool has_variable();
     Expr* subst(std::string str_new, Expr *e);
     
@@ -59,13 +60,13 @@ public:
 };
 
 
-class Add: public Expr {
+class AddExpr: public Expr {
 public:
     Expr *lhs; //!< left-hand-side expression of the Number expression
     Expr *rhs; //!< right-hand-side expression of the Number expression
-    Add(Expr *lhs, Expr *rhs);
+    AddExpr(Expr *lhs, Expr *rhs);
     bool equals(Expr *e);
-    int interp();
+    Val* interp();
     bool has_variable();
     Expr* subst(std::string str_new, Expr *e);
 
@@ -75,13 +76,13 @@ public:
 };
 
 
-class Mult: public Expr {
+class MultExpr: public Expr {
 public:
     Expr *lhs; //!<  left-hand-side expression of the Mult expression
     Expr *rhs; //!<  right-hand-side expression of the Mult expression
-    Mult(Expr *lhs, Expr *rhs);
+    MultExpr(Expr *lhs, Expr *rhs);
     bool equals(Expr *e);
-    int interp();
+    Val* interp();
     bool has_variable();
     Expr* subst(std::string str_new, Expr *e);
     
@@ -91,12 +92,12 @@ public:
 };
 
 
-class Var: public Expr {
+class VarExpr: public Expr {
 public:
     std::string str; //!<  string value of the Var expression
-    Var(std::string str);
+    VarExpr(std::string str);
     bool equals(Expr *e);
-    int interp();
+    Val* interp();
     bool has_variable();
     Expr* subst(std::string str_new, Expr *e);
 
@@ -106,14 +107,14 @@ public:
 };
 
 
-class Let: public Expr {
+class LetExpr: public Expr {
 public:
     std::string str; //!<  left-hand-side string of the let expression
     Expr *rhs; //!<  right-hand-side expression of the let expression
     Expr *body; // body expression of the let expression
-    Let(std::string str, Expr *rhs, Expr *body);
+    LetExpr(std::string str, Expr *rhs, Expr *body);
     bool equals(Expr *e);
-    int interp();
+    Val* interp();
     bool has_variable();
     Expr* subst(std::string str_new, Expr *e);
     
