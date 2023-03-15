@@ -7,14 +7,21 @@
 #include <iostream>
 #include "testDriver.hpp"
 
-std::string random_expr_var() {
+std::string random_VarExpr() {
     if ( (rand() % 2) < 1 ) return "x";
     else return "y";
 }
 
 std::string random_op() {
-    if ( (rand() % 2) < 1 ) return "+";
-    else return "*";
+    int r = (rand() % 10);
+    if ( r < 5 ) return "+";
+    else if ( r < 9 ) return "*";
+    else return "==";
+}
+
+std::string random_BoolExpr() {
+    if ( (rand() % 2) < 1 ) return "_true";
+    else return "_false";
 }
 
 // generate random expressions
@@ -24,16 +31,20 @@ std::string random_expr_string() {
     
     if ( r < 45 ) // numExpr
         return std::to_string(rand()%100);
-    else if ( r < 50 ) // negative numExpr
+    else if ( r < 46 ) // negative numExpr
         return "-" + std::to_string(rand()%100);
-    else if ( r < 52 ) // varExpr
-        return random_expr_var();
-    else if ( r < 55 )
+    else if ( r < 50 ) // boolExpr
+        return random_BoolExpr();
+    else if ( r < 55 ) // varExpr
+        return random_VarExpr();
+    else if ( r < 60 ) // (expr)
         return "(" + random_expr_string() + ")";
-    else if ( r < 98 ) // addExpr, multExpr
+    else if ( r < 80 ) // addExpr, multExpr, eqExpr
         return random_expr_string() + random_op() + random_expr_string();
+    else if ( r < 90 )
+        return "_let " + random_VarExpr() + " = " + random_expr_string() + " _in " + random_expr_string();
     else
-        return "_let " + random_expr_var() + " = " + random_expr_string() + " _in " + random_expr_string();
+        return "_if " + random_expr_string() + " _then " + random_expr_string() + " _else " + random_expr_string();
 
 }
 

@@ -74,7 +74,7 @@ bool NumExpr::equals(Expr* e){
 * \return int for this Number Expression
 */
 Val* NumExpr::interp(){
-    return new NumVal(this->val);
+    return new NumVal(val);
 }
 /**
 * \brief Check if the expression is a variable or contains a variable. Num expression always return false.
@@ -95,8 +95,8 @@ Expr* NumExpr::subst(std::string str_new, Expr *e){
 /**
  *\brief print expression with infix and parentheses
  */
-void NumExpr::print(std::ostream& ot){
-    ot<<std::to_string(val);
+void NumExpr::print(std::ostream& ost){
+    ost<<std::to_string(val);
 }
 
 /**
@@ -186,7 +186,7 @@ void AddExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long p
     }else{
         lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_add+1), acc+1, pos);
         ost<<" + ";
-        rhs->pretty_print_at(ost, prec_add, acc, pos);
+        rhs->pretty_print_at(ost, prec_add, 0, pos);
     }
     
 
@@ -258,16 +258,25 @@ void MultExpr::print(std::ostream& ot){
 void MultExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long pos){
 
     // left parentheses
+    
+    // check 1. rhs of * is let/if  2. * is other's lhs 3. !(p > 2) no () outside  4. p>0 means not let's body -> acc of rhs not reset to 0 -> to check add () or not
+    bool accReset = true;
+    LetExpr* n = dynamic_cast<LetExpr*>(rhs);
+    IfExpr* m = dynamic_cast<IfExpr*>(rhs);
+    if( (n != NULL || m != NULL) && acc > 0 && !(p > 2) && p > 0){
+        accReset = false;
+    }
+    
     if( p > 2 ){
         ost<<"(";
         lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_mult+1), acc+1, pos);
         ost<<" * ";
-        rhs->pretty_print_at(ost, prec_mult, 0, pos);
+        rhs->pretty_print_at(ost, prec_mult, (accReset)? 0:acc , pos);
         ost<<")";
     }else{
         lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_mult+1), acc+1, pos);
         ost<<" * ";
-        rhs->pretty_print_at(ost, prec_mult, acc, pos);
+        rhs->pretty_print_at(ost, prec_mult, (accReset)? 0:acc , pos);
     }
     
 }
@@ -368,7 +377,7 @@ Val* LetExpr::interp(){
 //    }
 
 //    Val* rhs_val = rhs->interp();
-    return body->subst(str,rhs)->interp();
+    return body->subst(str,rhs->interp()->to_expr())->interp();
 }
 
 /**
@@ -416,7 +425,7 @@ void LetExpr::print(std::ostream& ot){
 void LetExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long lastLinePos){
 
     
-    if(p > 1 && acc > 0){ // mult->let or add->let  , and not the rightest expression
+    if(p > 0 && acc > 0){ // mult->let or add->let  , and not the rightest expression(acc=0 means rightest)
         ost<<"(";
     }
     long letPos = ost.tellp();
@@ -442,8 +451,190 @@ void LetExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long l
     body->pretty_print_at(ost, prec_none, acc, newLinePos );
     
     
-    if(p > 1 && acc > 0){ // mult->let or add->let         ???????????? >1
+    if(p > 0 && acc > 0){
         ost<<")";
     }
 
+}
+
+
+/*
+ *** Class BoolExpr ************************************************
+ */
+BoolExpr::BoolExpr(bool val){
+    this->val = val;
+}
+
+bool BoolExpr::equals(Expr *e){
+    BoolExpr* n = dynamic_cast<BoolExpr*>(e);
+    if(n == NULL){
+        return false;
+    }else{
+        return( this->val == n->val );
+    }
+}
+
+Val* BoolExpr::interp(){
+    return new BoolVal(val);
+}
+
+bool BoolExpr::has_variable(){
+    return false;
+}
+
+Expr* BoolExpr::subst(std::string str_new, Expr *e){
+    return ( new BoolExpr( this->val ) ); // don't need to substitute a boolean
+}
+
+void BoolExpr::print(std::ostream& ost){
+    ost<<this->interp()->to_string();
+}
+
+void BoolExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long pos){
+    ost<<this->interp()->to_string();
+}
+
+/*
+ *** Class IfExpr ************************************************
+ */
+IfExpr::IfExpr(Expr* test_part, Expr* then_part, Expr* else_part){
+    this->test_part = test_part;
+    this->then_part = then_part;
+    this->else_part = else_part;
+}
+
+bool IfExpr::equals(Expr *e){
+    IfExpr* n = dynamic_cast<IfExpr*>(e);
+    if(n == NULL){
+        return false;
+    }else{
+        return( this->test_part->equals(n->test_part) &&
+               this->then_part->equals(n->then_part) &&
+               this->else_part->equals(n->else_part) );
+    }
+}
+
+Val* IfExpr::interp(){
+    if (test_part->interp()->is_true())
+        return then_part->interp();
+    else
+        return else_part->interp();
+}
+
+bool IfExpr::has_variable(){
+    return ( test_part->has_variable() ||
+            then_part->has_variable() ||
+            else_part->has_variable() );
+}
+
+Expr* IfExpr::subst(std::string str_new, Expr *e){
+    return ( new IfExpr( test_part->subst(str_new,e),
+                        then_part->subst(str_new,e),
+                        else_part->subst(str_new,e) ) );
+}
+
+void IfExpr::print(std::ostream& ost){
+    ost<<"(_if ";
+    test_part->print(ost);
+    ost<<" _then ";
+    then_part->print(ost);
+    ost<<" _else ";
+    else_part->print(ost);
+    ost<<")";
+}
+
+void IfExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long lastLinePos){
+
+    if(p > 0 && acc > 0){ // mult->let or add->let  , and not the rightest expression(acc=0 means rightest)
+        ost<<"(";
+    }
+    long ifPos = ost.tellp();
+    
+    // _if
+    ost<<"_if ";
+    test_part->pretty_print_at(ost, prec_none, acc, lastLinePos);
+    
+    // new line blank
+    ost<< "\n";
+    long newLinePos = ost.tellp();
+    for(int i = 0; i < ifPos - (lastLinePos) ; i++){
+        ost<< " ";
+    }
+    
+    // _then
+    ost<< "_then ";
+    then_part->pretty_print_at(ost, prec_none, acc, newLinePos);
+    
+    // new line blank
+    ost<< "\n";
+    newLinePos = ost.tellp();
+    for(int i = 0; i < ifPos - (lastLinePos) ; i++){
+        ost<< " ";
+    }
+    
+    // _else
+    ost<< "_else ";
+    else_part->pretty_print_at(ost, prec_none, acc, newLinePos);
+
+    if(p > 0 && acc > 0){
+        ost<<")";
+    }
+
+}
+
+
+
+/*
+ *** Class EqExpr ************************************************
+ */
+
+EqExpr::EqExpr(Expr* lhs, Expr* rhs){
+    this->lhs = lhs;
+    this->rhs = rhs;
+}
+
+bool EqExpr::equals(Expr *e){
+    EqExpr* n = dynamic_cast<EqExpr*>(e);
+    if(n == NULL){
+        return false;
+    }else{
+        return( this->lhs->equals(n->lhs) && this->rhs->equals(n->rhs) );
+    }
+}
+
+Val* EqExpr::interp(){
+    return new BoolVal(lhs->interp()->equals(rhs->interp()));
+}
+
+bool EqExpr::has_variable(){
+    return ( lhs->has_variable() || rhs->has_variable() );
+}
+
+Expr* EqExpr::subst(std::string str_new, Expr *e){
+    return new EqExpr( lhs->subst(str_new, e), rhs->subst(str_new, e) );
+}
+
+void EqExpr::print(std::ostream& ost){
+    ost<<"(";
+    lhs->print(ost);
+    ost<<"==";
+    rhs->print(ost);
+    ost<<")";
+}
+
+void EqExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long pos){
+    
+    // left parentheses
+    if(p > 0 ){
+        ost<<"(";
+        lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_none+1), acc+1, pos);
+        ost<<" == ";
+        rhs->pretty_print_at(ost, prec_none, 0, pos);
+        ost<<")";
+    }else{
+        lhs->pretty_print_at(ost, static_cast<precedence_t>(prec_none+1), acc+1, pos);
+        ost<<" == ";
+        rhs->pretty_print_at(ost, prec_none, acc, pos);
+    }
+    
 }

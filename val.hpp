@@ -11,7 +11,9 @@
 #include <stdio.h>
 #include <string>
 
+
 class Expr;
+
 
 class Val{
 public:
@@ -20,7 +22,9 @@ public:
     virtual Val* add_to(Val* other_val) = 0;
     virtual Val* mult_with(Val* other_val) = 0;
     virtual std::string to_string() = 0;
+    virtual bool is_true() = 0;
 };
+
 
 class NumVal: public Val{
 public:
@@ -32,16 +36,22 @@ public:
     Val* add_to(Val* other_val);
     Val* mult_with(Val* other_val);
     std::string to_string();
+    bool is_true();
 };
 
-//class BoolVal: public Val{
-//public:
-//    std::string rep;
-//    BoolVal(std::string rep);
-//    Val* add_to(Val* other_val);
-//    Val* mult_with(Val* other_val);
-////    Expr* to_expr();
-//};
+
+class BoolVal: public Val{
+public:
+    bool rep;
+    BoolVal(bool rep);
+    
+    bool equals(Val* e);
+    Expr* to_expr();
+    Val* add_to(Val* other_val);
+    Val* mult_with(Val* other_val);
+    std::string to_string();
+    bool is_true();
+};
 
 
 #endif /* val_hpp */

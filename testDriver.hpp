@@ -12,7 +12,9 @@
 #include <string>
 #include "exec.h"
 
-std::string random_expr_var();
+std::string random_VarExpr();
+std::string random_BoolExpr();
+std::string random_op();
 std::string random_expr_string();
 
 #endif /* testDriver_hpp */

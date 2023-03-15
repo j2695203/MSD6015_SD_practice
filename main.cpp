@@ -12,6 +12,7 @@
 */
 
 #include <iostream>
+#include "val.hpp"
 #include "expr.hpp"
 #include "cmdline.hpp"
 #include "parse.hpp"
@@ -32,7 +33,7 @@ int main(int argc, const char ** argv) {
                 
             case do_interp:
 //                std::cout << "Value: " << parse_expr(std::cin)->interp() << "\n";
-                std::cout << parse_expr(std::cin)->interp() << "\n";
+                std::cout << parse_expr(std::cin)->interp()->to_string() << "\n";
                 exit(0);
                 
             case do_print:

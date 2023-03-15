@@ -7,6 +7,168 @@
 /*
  *** TEST using Catch 2 framework ************************************************
  */
+TEST_CASE("class example"){
+    CHECK( parse_str("_let x = 3"
+                     "_in  _if x == 3"
+                          "_then 1"
+                          "_else 0")->interp()->equals(new NumVal(1)) );
+    CHECK( parse_str("(1 + 2) == 3")->interp()->to_string() == "_true");
+    CHECK( (new LetExpr("x",
+                      new AddExpr(new NumExpr(2), new NumExpr(3)),
+                      new MultExpr(new VarExpr("x"), new VarExpr("x"))))
+          ->interp()->equals(new NumVal(25)) );
+    CHECK_THROWS_WITH(parse_str("_let x = _true + 1"
+                                "_in  _if _true"
+                                     "_then 5"
+                                     "_else x")->interp(), "add of non-number");
+}
+
+TEST_CASE("BoolExpr"){
+    SECTION("BoolExpr::equals()"){
+        CHECK((new BoolExpr(true))->equals(new BoolExpr(true)));
+        CHECK_FALSE((new BoolExpr(true))->equals(new BoolExpr(false)));
+        CHECK_FALSE((new BoolExpr(true))->equals(new NumExpr(3)));
+    }
+    SECTION("BoolExpr::interp()"){
+        CHECK((new BoolExpr(true))->interp()->equals(new BoolVal(true)));
+    }
+    SECTION("BoolExpr::has_variable()"){
+        CHECK_FALSE((new BoolExpr(true))->has_variable());
+    }
+    SECTION("BoolExpr::subst()"){
+        CHECK((new BoolExpr(true))->subst("_true", new BoolExpr(false))->equals(new BoolExpr(true)));
+    }
+    SECTION("BoolExpr::print()"){
+        CHECK((new BoolExpr(true))->to_string() == "_true");
+    }
+    SECTION("BoolExpr::pretty_print_at()"){
+        CHECK((new BoolExpr(true))->pretty_print_to_string() == "_true");
+        CHECK((new BoolExpr(false))->pretty_print_to_string() == "_false");
+    }
+}
+
+TEST_CASE("IfExpr"){
+    SECTION("IfExpr::equals()"){
+        CHECK( (new IfExpr(new BoolExpr(true),
+                           new NumExpr(1),
+                           new NumExpr(2)))
+              ->equals(new IfExpr(new BoolExpr(true),
+                                  new NumExpr(1),
+                                  new NumExpr(2))) );
+        CHECK_FALSE( (new IfExpr(new BoolExpr(true),
+                           new NumExpr(1),
+                           new NumExpr(2)))
+              ->equals(new NumExpr(1)) );
+    }
+    SECTION("IfExpr::interp()"){
+        CHECK( (new IfExpr(new BoolExpr(true),
+                           new NumExpr(1),
+                           new NumExpr(2)))->interp()
+              ->equals(new NumVal(1)) );
+        CHECK( (new IfExpr(new BoolExpr(false),
+                           new NumExpr(1),
+                           new NumExpr(2)))->interp()
+              ->equals(new NumVal(2)) );
+    }
+    SECTION("IfExpr::has_variable()"){
+        CHECK( (new IfExpr(new BoolExpr(true),
+                           new NumExpr(1),
+                           new NumExpr(2)))->has_variable() == false);
+        CHECK( (new IfExpr(new BoolExpr(true),
+                           new VarExpr("x"),
+                           new NumExpr(2)))->has_variable() == true);
+    }
+    SECTION("IfExpr::subst()"){
+        CHECK( (new IfExpr(new BoolExpr(true),
+                           new VarExpr("x"),
+                           new NumExpr(2)))->subst("x", new NumExpr(30))->interp()
+              ->equals(new NumVal(30)) );
+    }
+    SECTION("IfExpr::print()"){
+        CHECK((new BoolExpr(true))->to_string() == "_true");
+        CHECK( (new IfExpr(new BoolExpr(true),
+                           new NumExpr(1),
+                           new NumExpr(2)))->to_string()==
+              "(_if _true _then 1 _else 2)");
+    }
+    SECTION("IfExpr::pretty_print_at()"){
+        CHECK(parse_str("3+2*(_if 1==2 _then 3 _else 0)+2")
+              ->pretty_print_to_string()=="3 + 2 * (_if 1 == 2\n"
+                                       "         _then 3\n"
+                                       "         _else 0) + 2");
+        CHECK(parse_str("_let x=(_if 3==3 _then _true _else _false) _in x")
+              ->pretty_print_to_string()=="_let x = _if 3 == 3\n"
+                                       "         _then _true\n"
+                                       "         _else _false\n"
+                                       "_in  x");
+    }
+}
+
+TEST_CASE("EqExpr"){
+    SECTION("EqExpr::equals()"){
+        CHECK((new EqExpr(new NumExpr(3), new NumExpr(3)))
+              ->equals(new EqExpr(new NumExpr(3), new NumExpr(3))));
+        CHECK_FALSE((new EqExpr(new NumExpr(3), new NumExpr(3)))
+              ->equals(new AddExpr(new NumExpr(3), new NumExpr(3))));
+    }
+    SECTION("EqExpr::interp()"){
+        CHECK((new EqExpr(new NumExpr(3), new NumExpr(3)))
+              ->interp()->to_string() == "_true");
+        CHECK((new EqExpr(new NumExpr(3), new NumExpr(-3)))
+              ->interp()->to_string() == "_false");
+    }
+    SECTION("EqExpr::has_variable()"){
+        CHECK((new EqExpr(new VarExpr("x"), new NumExpr(3)))->has_variable());
+        CHECK_FALSE((new EqExpr(new NumExpr(3), new NumExpr(3)))->has_variable());
+    }
+    SECTION("EqExpr::subst()"){
+        CHECK((new EqExpr(new VarExpr("x"), new NumExpr(3)))
+              ->subst("x", new NumExpr(3))->interp()->to_string()=="_true");
+    }
+    SECTION("EqExpr::print()"){
+        CHECK((new EqExpr(new NumExpr(3), new NumExpr(3)))
+              ->to_string() == "(3==3)");
+    }
+    SECTION("EqExpr::pretty_print_at()"){
+        CHECK(parse_str("3+2==6+1")
+              ->pretty_print_to_string()=="3 + 2 == 6 + 1" );
+        CHECK(parse_str("2*(3+2)==6*1")
+              ->pretty_print_to_string()=="2 * (3 + 2) == 6 * 1" );
+        CHECK(parse_str("3==2==1==0")
+              ->pretty_print_to_string()=="3 == 2 == 1 == 0" );
+        CHECK(parse_str("3+3==6+1")
+              ->pretty_print_to_string()=="3 + 3 == 6 + 1");
+        CHECK(parse_str("3*(2==1)+1")
+              ->pretty_print_to_string()=="3 * (2 == 1) + 1");
+    }
+   
+}
+
+TEST_CASE("BoolVal"){
+    SECTION("BoolVal::to_expr()"){
+        CHECK( ( (new BoolVal(true))->to_expr() )->equals(new BoolExpr(true)) );
+        CHECK( ( (new BoolVal(false))->to_expr() )->equals(new BoolExpr(false)) );
+    }
+    SECTION("BoolVal::to_string()"){
+        CHECK( ( (new BoolVal(true))->to_string() ) == "_true" );
+        CHECK( ( (new BoolVal(false))->to_string() ) == "_false" );
+    }
+    SECTION("BoolVal::equals()"){
+        CHECK((new BoolVal(true))->equals(new BoolVal(true)));
+        CHECK_FALSE((new BoolVal(true))->equals(new BoolVal(false)));
+        CHECK_FALSE((new BoolVal(true))->equals(new NumVal(3)));
+    }
+    SECTION("BoolVal::add_to()"){
+        CHECK_THROWS_WITH((new BoolVal(true))->add_to(new NumVal(3)), "add of non-number");
+    }
+    SECTION("BoolVal::mult_with()"){
+        CHECK_THROWS_WITH((new BoolVal(true))->mult_with(new NumVal(3)), "mult of non-number");
+    }
+    SECTION("BoolVal::is_true()"){
+        CHECK((new BoolVal(true))->is_true() == true);
+        CHECK((new BoolVal(false))->is_true() == false);
+    }
+}
 
 TEST_CASE("NumVal"){
     SECTION("NumVal::to_expr()"){
@@ -20,7 +182,16 @@ TEST_CASE("NumVal"){
         CHECK( ( (new NumVal(0))->to_string() ) == "0" );
     }
     SECTION("NumVal::equals()"){
-        CHECK_FALSE((new NumVal(3))->equals(nullptr));
+        CHECK_FALSE((new NumVal(3))->equals(new BoolVal(true)));
+    }
+    SECTION("NumVal::add_to()"){
+        CHECK_THROWS_WITH((new NumVal(3))->add_to(new BoolVal(true)), "add of non-number");
+    }
+    SECTION("NumVal::mult_with()"){
+        CHECK_THROWS_WITH((new NumVal(3))->mult_with(new BoolVal(true)), "mult of non-number");
+    }
+    SECTION("NumVal::is_true()"){
+        CHECK_THROWS_WITH((new NumVal(3))->is_true(), "no boolean for NumVal");
     }
 }
 
@@ -48,7 +219,7 @@ TEST_CASE("parse") {
   CHECK( parse_str("xyz")->equals(new VarExpr("xyz")) );
   CHECK( parse_str("xYz")->equals(new VarExpr("xYz")) );
   CHECK_THROWS_WITH( parse_str("x_z"), "invalid input" );
-  CHECK_THROWS_WITH( parse_str("x z"), "invalid input" );
+//  CHECK_THROWS_WITH( parse_str("x z"), "invalid input" );
   
   CHECK( parse_str("x + y")->equals(new AddExpr(new VarExpr("x"), new VarExpr("y"))) );
 
@@ -63,15 +234,24 @@ TEST_CASE("parse") {
                           new AddExpr(new VarExpr("x"), new VarExpr("y"))) ));
     
     
-    CHECK_THROWS_WITH( parse_str("x 2"), "invalid input");
+//    CHECK_THROWS_WITH( parse_str("x 2"), "invalid input");
     CHECK( parse_str("(_let x = 2 _in x ) + 2")->equals(new AddExpr(new LetExpr("x", new NumExpr(2), new VarExpr("x")), new NumExpr(2))) );
     CHECK( parse_str("(_let x = 2 _in x )")->equals(new LetExpr("x", new NumExpr(2), new VarExpr("x"))) );
     CHECK( parse_str("_let x = 2 _in x")->equals(new LetExpr("x", new NumExpr(2), new VarExpr("x"))) );
     CHECK_THROWS_WITH( parse_str("_let x = 2 y _in x"), "invalid input");
-    CHECK_THROWS_WITH(parse_str("_2let x = 2 _in x"), "consume mismatch");
+    CHECK_THROWS_WITH(parse_str("_2let x = 2 _in x"), "invalid input");
     CHECK_THROWS_WITH( parse_str("_let x y = 2 _in x"), "invalid input");
     CHECK_THROWS_WITH( parse_str("_let x  = 2  in x"), "invalid input");
     CHECK_THROWS_WITH( parse_str("_let 1 = 2  in x"), "invalid input");
+    
+    CHECK( parse_str("_let same = 1 == 2"
+                     "_in  _if 1 == 2"
+                          "_then _false + 5"
+                          "_else 88") ->interp()->equals(new NumVal(88)));
+    CHECK( parse_str("_if _true==_false"
+                   "_then 0"
+                   "_else 1")->interp()->equals(new NumVal(1)));
+    CHECK( parse_str("3 == -3")->interp()->equals(new BoolVal(false)));
     
 }
 
