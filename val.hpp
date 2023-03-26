@@ -23,6 +23,7 @@ public:
     virtual Val* mult_with(Val* other_val) = 0;
     virtual std::string to_string() = 0;
     virtual bool is_true() = 0;
+    virtual Val* call(Val *actual_arg) = 0;
 };
 
 
@@ -37,6 +38,7 @@ public:
     Val* mult_with(Val* other_val);
     std::string to_string();
     bool is_true();
+    virtual Val* call(Val *actual_arg);
 };
 
 
@@ -51,6 +53,23 @@ public:
     Val* mult_with(Val* other_val);
     std::string to_string();
     bool is_true();
+    virtual Val* call(Val *actual_arg);
+};
+
+
+class FunVal: public Val{
+public:
+    std::string formal_arg;
+    Expr *body;
+    FunVal(std::string formal_arg, Expr *body);
+    
+    bool equals(Val* e);
+    Expr* to_expr();
+    Val* add_to(Val* other_val);
+    Val* mult_with(Val* other_val);
+    std::string to_string();
+    bool is_true();
+    virtual Val* call(Val *actual_arg);
 };
 
 

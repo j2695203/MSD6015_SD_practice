@@ -30,7 +30,10 @@ Expr* parse_expr(std::istream &in){
     skip_whitespace(in);
     
     int c = in.peek();
-    if( c == '='){
+    
+    if( isdigit(c) || isalpha(c) ){
+        throw std::runtime_error("invalid input");
+    }else if( c == '='){
         consume(in, c);
         consume(in, '=');
         Expr* rhs = parse_expr(in);
@@ -72,10 +75,24 @@ Expr* parse_addend(std::istream &in){
     }
 }
 
+Expr* parse_multicand(std::istream &in){
+    Expr* e = parse_inner(in);
+    
+    skip_whitespace(in);
+    
+    while( in.peek() == '('){
+        consume(in, '(');
+        Expr* actual_arg = parse_expr(in);
+        consume(in, ')');
+        e = new CallExpr(e, actual_arg);
+    }
+    return e;
+}
+
 /**
  num, (expr), var, _let var = expr _in expr
  */
-Expr* parse_multicand(std::istream &in){
+Expr* parse_inner(std::istream &in){
     // skip whitespace
     skip_whitespace(in);
     
@@ -99,13 +116,19 @@ Expr* parse_multicand(std::istream &in){
         
     }else if( c == '_' ){
         consume(in, c);
-        c = in.peek();
-        if( c == 'l' ) // let
+        
+        std::string keyword = parse_var(in)->to_string();
+        
+        if( keyword == "let" ) // let
             return parse_let(in);
-        else if( c == 't' || c == 'f' ) // true or false
-            return parse_bool(in);
-        else if( c == 'i' ) // if
+        else if( keyword == "true" ) // true
+            return new BoolExpr(true);
+        else if( keyword == "false" ) // false
+            return new BoolExpr(false);
+        else if( keyword == "if" ) // if
             return parse_if(in);
+        else if( keyword == "fun" ) // fun
+            return parse_fun(in);
         else
             throw std::runtime_error("invalid input");
         
@@ -175,126 +198,101 @@ Expr* parse_let(std::istream &in){
     
     skip_whitespace(in);
     
-    // _let
-    int c = in.peek();
-    if ( c == 'l' ){
-        consume(in,'l');
-        consume(in,'e');
-        consume(in,'t');
-        skip_whitespace(in);
-        
-        // variable (string)
-        std::string str;
-        str = parse_var(in)->to_string();
-        skip_whitespace(in);
-        
-        // "="
-        c = in.get();
-        if( c != '=' ){
-            throw std::runtime_error("invalid input");
-        }
-        skip_whitespace(in);
-        
-        // rhs expression
-        Expr* rhs = parse_expr(in);
-        skip_whitespace(in);
-        
-        // "_in"
-        c = in.get();
-        if( c != '_' ){ // (rhs will deals with it first, so never enter this)
-            throw std::runtime_error("invalid input");
-        }
-        consume(in, 'i');
-        consume(in, 'n');
-        skip_whitespace(in);
-        
-        // body expression
-        Expr* body = parse_expr(in);
-        
-        // return let expression
-        return new LetExpr(str, rhs, body);
-        
-    }else{ // (multicand will check if it's _let first, so never enter this)
-        consume(in, c);
-        throw std::runtime_error("invalid input");
-    }
-}
-
-Expr* parse_bool(std::istream &in){
+    // variable (string)
+    std::string str;
+    str = parse_var(in)->to_string();
     skip_whitespace(in);
     
-    // _true
-    int c = in.peek();
-    if ( c == 't' ){
-        consume(in,'t');
-        consume(in,'r');
-        consume(in,'u');
-        consume(in,'e');
-        skip_whitespace(in);
-        // return bool expression
-        return new BoolExpr(true);
-        
-    }else if( c == 'f' ){
-        consume(in,'f');
-        consume(in,'a');
-        consume(in,'l');
-        consume(in,'s');
-        consume(in,'e');
-        skip_whitespace(in);
-        // return bool expression
-        return new BoolExpr(false);
-        
-    }else{ // (multicand will check if it's _true or _false first, so never enter this)
-        consume(in, c);
+    // "="
+    int c = in.get();
+    if( c != '=' ){
         throw std::runtime_error("invalid input");
     }
+    skip_whitespace(in);
+    
+    // rhs expression
+    Expr* rhs = parse_expr(in);
+    skip_whitespace(in);
+    
+    // "_in"
+    c = in.get();
+    if( c != '_' ){ // (rhs will deals with it first, so never enter this)
+        throw std::runtime_error("invalid input");
+    }
+    consume(in, 'i');
+    consume(in, 'n');
+    skip_whitespace(in);
+    
+    // body expression
+    Expr* body = parse_expr(in);
+    
+    // return let expression
+    return new LetExpr(str, rhs, body);
 }
+
 
 Expr* parse_if(std::istream &in){
+    
     skip_whitespace(in);
     
-    // _if
-    int c = in.peek();
-    if ( c == 'i' ){
-        consume(in,'i');
-        consume(in,'f');
-        skip_whitespace(in);
-        
-        // test expression
-        Expr* test_part = parse_expr(in);
-        skip_whitespace(in);
-        
-        // _then
-        consume(in,'_');
-        consume(in,'t');
-        consume(in,'h');
-        consume(in,'e');
-        consume(in,'n');
-        skip_whitespace(in);
-        
-        // then expression
-        Expr* then_part = parse_expr(in);
-        skip_whitespace(in);
-        
-        // _else
-        consume(in,'_');
-        consume(in,'e');
-        consume(in,'l');
-        consume(in,'s');
-        consume(in,'e');
-        skip_whitespace(in);
-        
-        // else expression
-        Expr* else_part = parse_expr(in);
-        skip_whitespace(in);
-        
-        // return if expression
-        return new IfExpr(test_part, then_part, else_part);
-        
-    }else{ // (multicand will check if it's _if first, so never enter this)
-        consume(in, c);
+    // test expression
+    Expr* test_part = parse_expr(in);
+    skip_whitespace(in);
+    
+    // _then
+    consume(in,'_');
+    consume(in,'t');
+    consume(in,'h');
+    consume(in,'e');
+    consume(in,'n');
+    skip_whitespace(in);
+    
+    // then expression
+    Expr* then_part = parse_expr(in);
+    skip_whitespace(in);
+    
+    // _else
+    consume(in,'_');
+    consume(in,'e');
+    consume(in,'l');
+    consume(in,'s');
+    consume(in,'e');
+    skip_whitespace(in);
+    
+    // else expression
+    Expr* else_part = parse_expr(in);
+    skip_whitespace(in);
+    
+    // return if expression
+    return new IfExpr(test_part, then_part, else_part);
+    
+}
+
+Expr* parse_fun(std::istream &in){
+    
+    skip_whitespace(in);
+    
+    // "("
+    if( in.get() != '(' ){
         throw std::runtime_error("invalid input");
     }
+    skip_whitespace(in);
+    
+    // formal_arg expression
+    std::string formal_arg = parse_var(in)->to_string();
+    skip_whitespace(in);
+    
+    // ")"
+    if( in.get() != ')' ){
+        throw std::runtime_error("invalid input");
+    }
+    skip_whitespace(in);
+    
+    // body expression
+    Expr* body = parse_expr(in);
+    
+    // return fun expression
+    return new FunExpr(formal_arg, body);
 }
 
 

@@ -7,6 +7,153 @@
 /*
  *** TEST using Catch 2 framework ************************************************
  */
+TEST_CASE("quiz function vals") {
+    // 1
+    CHECK(parse_str("_let f = _fun (x) x+ 1 \n"
+                                 "_in f(5) ")->interp()->equals(new NumVal(6)));
+
+    // 2
+    CHECK(parse_str("_let f = _fun (x)\n"
+                                 "           7\n"
+                                 "_in f(5)")->interp()->equals(new NumVal(7)));
+
+    // 3
+    CHECK(parse_str("_let f = _fun (x)\n"
+                                 "           _true\n"
+                                 "_in f(5) ")->interp()->equals(new BoolVal(true)));
+
+    // 4
+    CHECK_THROWS_WITH(parse_str("_let f = _fun (x)\n"
+                                             "           x + _true\n"
+                                             "_in f(5) ")->interp(), "add of non-number");
+
+    // 5
+    CHECK(parse_str("_let f = _fun (x)\n"
+                                 "           x + _true\n"
+                                 "_in 5 + 1 ")->interp()->equals(new NumVal(6)));
+
+    // 6
+    CHECK_THROWS_WITH(parse_str("_let f = _fun (x)\n"
+                                             "           7\n"
+                                             "_in  f(5 + _true)")->interp(), "add of non-number");
+
+    // 7
+    CHECK_THROWS_WITH(parse_str("_let f = _fun (x) x+ 1\n"
+                                 "_in f + 5")->interp(),"no add_to for FunVal");
+
+    // 8
+    CHECK(parse_str("_let f = _fun (x) x+ 1 \n"
+                                 "_in _if _false\n"
+                                 "    _then f(5)\n"
+                                 "    _else f(6)")->interp()->equals(new NumVal(7)));
+
+    // 9
+    CHECK(parse_str("_let f = _fun (x) x+ 1 \n"
+                                 "_in _let g = _fun (y) y+ 2 \n"
+                                 "_in _if _true\n"
+                                 "    _then f(5)\n"
+                                 "    _else g(5)")->interp()->equals(new NumVal(6)));
+
+    // 10
+    CHECK(parse_str("_let f = _fun (x) x+ 1 \n"
+                                 "_in _let g = _fun (y) y+ 2 \n"
+                                 "_in f(g(5)) ")->interp()->equals(new NumVal(8)));
+
+    // 11
+    CHECK(parse_str("_let f = _fun (x) x+ 1 \n"
+                                 "_in _let g = _fun (y)\n"
+                                 "              f(y + 2)\n"
+                                 "_in g(5) ")->interp()->equals(new NumVal(8)));
+
+    // 12
+    CHECK(parse_str("_let f = _fun (x) x+ 1 \n"
+                                 "_in _let g = _fun (x)\n"
+                                 "              f(2) + x\n"
+                                 "_in g(5) ")->interp()->equals(new NumVal(8)));
+
+    // 13
+    CHECK_THROWS_WITH(parse_str("_let f = _fun (x) x+ 1 \n"
+                                             "_in f 5 ")->interp(), "invalid input");
+
+    // 14
+    CHECK(parse_str("_let f = _fun (x) x+ 1 \n"
+                                 "_in (f)(5) ")->interp()->equals(new NumVal(6)));
+
+    // 15
+    auto *add_x_1 = new AddExpr(new VarExpr("x"), new NumExpr(1));
+    auto *fun_val_x_add_x_1 = new FunVal("x", add_x_1);
+    CHECK(parse_str("_fun (x) x+ 1 ")->interp()->equals(fun_val_x_add_x_1));
+
+    //16
+    CHECK(parse_str("_let f = _fun (x) x+ 1 \n"
+                                 "_in f ")->interp()->equals(fun_val_x_add_x_1));
+
+    // 17
+    CHECK(parse_str("(_fun (x)\n"
+                                 "   x + 1)(5)")->interp()->equals(new NumVal(6)));
+
+    // 18
+    CHECK(parse_str("_let f = _if _false\n"
+                                 "            _then _fun (x)  \n"
+                                 "                        x+ 1 \n"
+                                 "           _else _fun (x)\n"
+                                 "                       x+ 2\n"
+                                 "_in f(5)")->interp()->equals(new NumVal(7)));
+
+    // 19
+    CHECK(parse_str("(_if _false \n"
+                                 "  _then _fun (x)\n"
+                                 "            x+ 1\n"
+                                 "   _else _fun (x)\n"
+                                 "                x + 2)(5)")->interp()->equals(new NumVal(7)));
+
+    // 20
+    CHECK(parse_str("_let f = _fun (g)\n"
+                                 "           g(5)\n"
+                                 "_in _let g = _fun (y)  \n"
+                                 "             y + 2\n"
+                                 "_in f(g) ")->interp()->equals(new NumVal(7)));
+
+    // 21
+    CHECK(parse_str("_let f = _fun (g)\n"
+                                 "           g(5)\n"
+                                 "_in f(_fun (y)\n"
+                                 "        y + 2)")->interp()->equals(new NumVal(7)));
+
+    // 22
+    CHECK(parse_str("_let f = _fun (x)\n"
+                                 "           _fun (y)\n"
+                                 "x+ y _in (f(5))(1) ")->interp()->equals(new NumVal(6)));
+
+    // 23
+    CHECK(parse_str("_let f = _fun (x)\n"
+                                 "           _fun (y)\n"
+                                 "x+ y _in f(5)(1) ")->interp()->equals(new NumVal(6)));
+
+    // 24
+    CHECK(parse_str("_let f = _fun (x)\n"
+                                 "           _fun (g)\n"
+                                 "             g(x + 1)\n"
+                                 "_in _let g = _fun (y)\n"
+                                 "              y+ 2 \n"
+                                 "_in (f(5))(g) ")->interp()->equals(new NumVal(8)));
+
+    // 25
+    CHECK(parse_str("_let f = _fun (x)\n"
+                                 "           _fun (g)\n"
+                                 "             g(x + 1)\n"
+                                 "_in _let g = _fun (y)\n"
+                                 "y+ 2 _in f(5)(g)")->interp()->equals(new NumVal(8)));
+
+    // 26
+    CHECK(parse_str("_let f = _fun (f)\n"
+                                 "           _fun (x)\n"
+                                 "             _if x == 0\n"
+                                 "             _then 0\n"
+                                 "             _else x + f(f)(x + -1)\n"
+                                 "_in f(f)(3)")->interp()->equals(new NumVal(6)));
+}
+
 TEST_CASE("class example"){
     CHECK( parse_str("_let x = 3"
                      "_in  _if x == 3"
@@ -20,7 +167,7 @@ TEST_CASE("class example"){
     CHECK_THROWS_WITH(parse_str("_let x = _true + 1"
                                 "_in  _if _true"
                                      "_then 5"
-                                     "_else x")->interp(), "add of non-number");
+                                     "_else x")->interp(), "invalid input");
 }
 
 TEST_CASE("BoolExpr"){
@@ -32,9 +179,7 @@ TEST_CASE("BoolExpr"){
     SECTION("BoolExpr::interp()"){
         CHECK((new BoolExpr(true))->interp()->equals(new BoolVal(true)));
     }
-    SECTION("BoolExpr::has_variable()"){
-        CHECK_FALSE((new BoolExpr(true))->has_variable());
-    }
+
     SECTION("BoolExpr::subst()"){
         CHECK((new BoolExpr(true))->subst("_true", new BoolExpr(false))->equals(new BoolExpr(true)));
     }
@@ -70,14 +215,7 @@ TEST_CASE("IfExpr"){
                            new NumExpr(2)))->interp()
               ->equals(new NumVal(2)) );
     }
-    SECTION("IfExpr::has_variable()"){
-        CHECK( (new IfExpr(new BoolExpr(true),
-                           new NumExpr(1),
-                           new NumExpr(2)))->has_variable() == false);
-        CHECK( (new IfExpr(new BoolExpr(true),
-                           new VarExpr("x"),
-                           new NumExpr(2)))->has_variable() == true);
-    }
+   
     SECTION("IfExpr::subst()"){
         CHECK( (new IfExpr(new BoolExpr(true),
                            new VarExpr("x"),
@@ -117,10 +255,7 @@ TEST_CASE("EqExpr"){
         CHECK((new EqExpr(new NumExpr(3), new NumExpr(-3)))
               ->interp()->to_string() == "_false");
     }
-    SECTION("EqExpr::has_variable()"){
-        CHECK((new EqExpr(new VarExpr("x"), new NumExpr(3)))->has_variable());
-        CHECK_FALSE((new EqExpr(new NumExpr(3), new NumExpr(3)))->has_variable());
-    }
+
     SECTION("EqExpr::subst()"){
         CHECK((new EqExpr(new VarExpr("x"), new NumExpr(3)))
               ->subst("x", new NumExpr(3))->interp()->to_string()=="_true");
@@ -248,8 +383,8 @@ TEST_CASE("parse") {
                      "_in  _if 1 == 2"
                           "_then _false + 5"
                           "_else 88") ->interp()->equals(new NumVal(88)));
-    CHECK( parse_str("_if _true==_false"
-                   "_then 0"
+    CHECK( parse_str("_if _true==_false\n"
+                   "_then 0\n"
                    "_else 1")->interp()->equals(new NumVal(1)));
     CHECK( parse_str("3 == -3")->interp()->equals(new BoolVal(false)));
     
@@ -355,14 +490,7 @@ TEST_CASE("Let_all methods"){
         CHECK_FALSE((new LetExpr("x", new NumExpr(5), new AddExpr(new VarExpr("x"), new NumExpr(1))) )
                     ->equals(new AddExpr(new NumExpr(5), new AddExpr(new VarExpr("x"), new NumExpr(1)))));
     }
-    SECTION("has_variable"){
-        CHECK((new LetExpr("x", new NumExpr(5), new AddExpr(new VarExpr("x"), new NumExpr(1))) )
-              ->has_variable());
-        CHECK((new LetExpr("x", new AddExpr(new VarExpr("x"),new NumExpr(2)) , new AddExpr(new NumExpr(3), new NumExpr(1))))
-              ->has_variable());
-        CHECK_FALSE((new LetExpr("x", new NumExpr(5) , new AddExpr(new NumExpr(3), new NumExpr(1))))
-              ->has_variable());
-    }
+
     SECTION("subst"){
         CHECK( ((new LetExpr("x", new NumExpr(5), new AddExpr(new VarExpr("x"), new NumExpr(1))))
               ->subst("x", new NumExpr(10))->interp())->equals(new NumVal(6)) );
@@ -475,28 +603,6 @@ TEST_CASE("Test_interp()"){
    
 }
 
-TEST_CASE("Test_hasVariable()"){
-    
-    SECTION("addExpr"){
-        CHECK_FALSE( (new AddExpr(new AddExpr(new NumExpr(10), new NumExpr(15)),new AddExpr(new NumExpr(20),new NumExpr(20))))->has_variable() ); // num only
-        CHECK( (new AddExpr(new VarExpr("dog"), new VarExpr("cat")))->has_variable() ); // var only
-        CHECK( (new AddExpr(new VarExpr("dog"), new NumExpr(2)))->has_variable() ); // num + var
-    }
-
-    SECTION("multExpr"){
-        CHECK_FALSE( (new MultExpr(new NumExpr(3), new NumExpr(2)))->has_variable() ); // num only
-        CHECK( (new MultExpr(new VarExpr("dog"), new VarExpr("cat")))->has_variable() ); // var only
-        CHECK( (new MultExpr(new VarExpr("dog"), new NumExpr(2)))->has_variable() ); // num + var
-    }
-    
-    SECTION("numExpr_only"){
-        CHECK_FALSE( (new NumExpr(5))->has_variable() );
-    }
-    
-    SECTION("varExpr_only"){
-        CHECK( (new VarExpr("x"))->has_variable() );
-    }
-}
 
 TEST_CASE("Test_subst()"){
     
@@ -754,14 +860,7 @@ TEST_CASE("Let_equals_mine") {
         }
 }
 
-TEST_CASE("Let_has_variable_mine") {
-    SECTION("has") {
-        REQUIRE( (new LetExpr("x", new NumExpr(4), new AddExpr(new NumExpr(2), new VarExpr("x")) ))->has_variable());
-    }
-    SECTION("does_not_has") {
-        REQUIRE( !(new LetExpr("x", new NumExpr(4), new AddExpr(new NumExpr(2), new NumExpr(4)) ))->has_variable());
-    }
-}
+
 TEST_CASE("Let_print_mine") {
     CHECK( (new LetExpr("x", new NumExpr(5), new AddExpr(new LetExpr("y", new NumExpr(3), new AddExpr(new VarExpr("y"), new NumExpr(2))), new VarExpr("x")))) -> to_string()
                                                                                                         == "(_let x=5 _in ((_let y=3 _in (y+2))+x))");

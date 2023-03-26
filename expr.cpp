@@ -76,13 +76,13 @@ bool NumExpr::equals(Expr* e){
 Val* NumExpr::interp(){
     return new NumVal(val);
 }
-/**
-* \brief Check if the expression is a variable or contains a variable. Num expression always return false.
-* \return bool if the num expression is a variable. It should always return false.
-*/
-bool NumExpr::has_variable(){
-    return false;
-}
+///**
+//* \brief Check if the expression is a variable or contains a variable. Num expression always return false.
+//* \return bool if the num expression is a variable. It should always return false.
+//*/
+//bool NumExpr::has_variable(){
+//    return false;
+//}
 /**
 * \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
 * \param str_new first argument, the string to be replaced
@@ -142,13 +142,13 @@ bool AddExpr::equals(Expr* e){
 Val* AddExpr::interp() {
     return( lhs->interp()->add_to(rhs->interp()) );
 }
-/**
-* \brief Check if the Add expression is a variable or contains a variable.
-* \return bool if the Add expression is a variable or contains a variable.
-*/
-bool AddExpr::has_variable(){
-    return( lhs->has_variable() || rhs->has_variable() );
-}
+///**
+//* \brief Check if the Add expression is a variable or contains a variable.
+//* \return bool if the Add expression is a variable or contains a variable.
+//*/
+//bool AddExpr::has_variable(){
+//    return( lhs->has_variable() || rhs->has_variable() );
+//}
 /**
 * \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
 * \param str_new first argument, the string to be replaced
@@ -223,13 +223,13 @@ bool MultExpr::equals(Expr* e){
 Val* MultExpr::interp(){
     return( lhs->interp()->mult_with(rhs->interp()) );
 }
-/**
-* \brief Check if the Mult expression is a variable or contains a variable.
-* \return bool if the Mult expression is a variable or contains a variable.
-*/
-bool MultExpr::has_variable(){
-    return( lhs->has_variable() || rhs->has_variable() );
-}
+///**
+//* \brief Check if the Mult expression is a variable or contains a variable.
+//* \return bool if the Mult expression is a variable or contains a variable.
+//*/
+//bool MultExpr::has_variable(){
+//    return( lhs->has_variable() || rhs->has_variable() );
+//}
 /**
 * \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
 * \param str_new first argument, the string to be replaced
@@ -309,13 +309,13 @@ bool VarExpr::equals(Expr* e){
 Val* VarExpr::interp(){
     throw std::runtime_error("no value for variable");
 }
-/**
-* \brief Check if the Var expression is a variable.
-* \return bool if the Var expression is a variable. It should always return true.
-*/
-bool VarExpr::has_variable(){
-    return true;
-}
+///**
+//* \brief Check if the Var expression is a variable.
+//* \return bool if the Var expression is a variable. It should always return true.
+//*/
+//bool VarExpr::has_variable(){
+//    return true;
+//}
 /**
 * \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
 * \param str_new first argument, the string to be replaced
@@ -380,13 +380,13 @@ Val* LetExpr::interp(){
     return body->subst(str,rhs->interp()->to_expr())->interp();
 }
 
-/**
-* \brief Check if the Let expression is a variable or contains a variable.
-* \return bool if the Let expression is a variable or contains a variable.
-*/
-bool LetExpr::has_variable(){
-    return( rhs->has_variable() || body->has_variable() );
-}
+///**
+//* \brief Check if the Let expression is a variable or contains a variable.
+//* \return bool if the Let expression is a variable or contains a variable.
+//*/
+//bool LetExpr::has_variable(){
+//    return( rhs->has_variable() || body->has_variable() );
+//}
 
 /**
 * \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
@@ -478,9 +478,9 @@ Val* BoolExpr::interp(){
     return new BoolVal(val);
 }
 
-bool BoolExpr::has_variable(){
-    return false;
-}
+//bool BoolExpr::has_variable(){
+//    return false;
+//}
 
 Expr* BoolExpr::subst(std::string str_new, Expr *e){
     return ( new BoolExpr( this->val ) ); // don't need to substitute a boolean
@@ -521,11 +521,11 @@ Val* IfExpr::interp(){
         return else_part->interp();
 }
 
-bool IfExpr::has_variable(){
-    return ( test_part->has_variable() ||
-            then_part->has_variable() ||
-            else_part->has_variable() );
-}
+//bool IfExpr::has_variable(){
+//    return ( test_part->has_variable() ||
+//            then_part->has_variable() ||
+//            else_part->has_variable() );
+//}
 
 Expr* IfExpr::subst(std::string str_new, Expr *e){
     return ( new IfExpr( test_part->subst(str_new,e),
@@ -606,9 +606,9 @@ Val* EqExpr::interp(){
     return new BoolVal(lhs->interp()->equals(rhs->interp()));
 }
 
-bool EqExpr::has_variable(){
-    return ( lhs->has_variable() || rhs->has_variable() );
-}
+//bool EqExpr::has_variable(){
+//    return ( lhs->has_variable() || rhs->has_variable() );
+//}
 
 Expr* EqExpr::subst(std::string str_new, Expr *e){
     return new EqExpr( lhs->subst(str_new, e), rhs->subst(str_new, e) );
@@ -637,4 +637,80 @@ void EqExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long po
         rhs->pretty_print_at(ost, prec_none, acc, pos);
     }
     
+}
+
+
+/*
+ *** Class FunExpr ************************************************
+ */
+FunExpr::FunExpr(std::string formal_arg, Expr *body){
+    this->formal_arg = formal_arg;
+    this->body = body;
+}
+
+bool FunExpr::equals(Expr *e){
+    FunExpr* n = dynamic_cast<FunExpr*>(e);
+    if(n == NULL){
+        return false;
+    }else{
+        return( this->formal_arg == (n->formal_arg) && this->body->equals(n->body) );
+    }
+}
+
+Val* FunExpr::interp(){
+    return new FunVal(formal_arg, body);
+}
+
+
+Expr* FunExpr::subst(std::string str_new, Expr *e){
+    if( str_new == formal_arg ){
+        return new FunExpr( formal_arg ,body );
+    }
+    return new FunExpr( formal_arg ,body->subst(str_new, e) );
+}
+
+void FunExpr::print(std::ostream& ost){
+    ost<<"(_fun (" << formal_arg << ") ";
+    body->print(ost);
+    ost<<")";
+}
+
+void FunExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long pos){
+}
+
+
+/*
+ *** Class CallExpr ************************************************
+ */
+CallExpr::CallExpr(Expr *to_be_called, Expr *actual_arg){
+    this->to_be_called = to_be_called;
+    this->actual_arg = actual_arg;
+}
+
+bool CallExpr::equals(Expr *e){
+    CallExpr* n = dynamic_cast<CallExpr*>(e);
+    if(n == NULL){
+        return false;
+    }else{
+        return( to_be_called->equals(n->to_be_called) && actual_arg->equals(n->actual_arg) );
+    }
+}
+
+Val* CallExpr::interp(){
+    return to_be_called->interp()->call(actual_arg->interp());
+}
+
+
+Expr* CallExpr::subst(std::string str_new, Expr *e){
+    return new CallExpr( to_be_called->subst(str_new, e), actual_arg->subst(str_new, e) );
+}
+
+void CallExpr::print(std::ostream& ost){
+    to_be_called->print(ost);
+    ost<<"(";
+    actual_arg->print(ost);
+    ost<<")";
+}
+
+void CallExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long pos){
 }
