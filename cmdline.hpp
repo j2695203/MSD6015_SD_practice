@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "catch.h"
+#include "pointer.h"
 
 
 typedef enum {

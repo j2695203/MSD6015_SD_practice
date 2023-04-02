@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string>
 #include "exec.h"
+#include "pointer.h"
 
 std::string random_VarExpr();
 std::string random_BoolExpr();

@@ -14,7 +14,7 @@
 
 
 /*
- *** Class Expr ************************************************
+ *** Class PTR(Expr)***********************************************
  */
 
 /**
@@ -60,8 +60,8 @@ NumExpr::NumExpr(int val) {
 * \param e first argument,the Expression to be compared
 * \return bool if the Expression to be compared is a Number Expression
 */
-bool NumExpr::equals(Expr* e){
-    NumExpr* n = dynamic_cast<NumExpr*>(e);
+bool NumExpr::equals(PTR(Expr) e){
+    PTR(NumExpr) n = CAST(NumExpr)(e);
     if(n == NULL){
         return false;
     }else{
@@ -73,8 +73,8 @@ bool NumExpr::equals(Expr* e){
 * \brief return an int for the value of the number.
 * \return int for this Number Expression
 */
-Val* NumExpr::interp(){
-    return new NumVal(val);
+PTR(Val) NumExpr::interp(){
+    return NEW(NumVal)(val);
 }
 ///**
 //* \brief Check if the expression is a variable or contains a variable. Num expression always return false.
@@ -84,13 +84,13 @@ Val* NumExpr::interp(){
 //    return false;
 //}
 /**
-* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
+* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
 * \param str_new first argument, the string to be replaced
 * \param e second argument, the Expression replace str_new
-* \return Expr* that after replacement
+* \return PTR(Expr) that after replacement
 */
-Expr* NumExpr::subst(std::string str_new, Expr *e){
-    return ( new NumExpr( this->val ) ); // don't need to substitute a number
+PTR(Expr) NumExpr::subst(std::string str_new, PTR(Expr)e){
+    return ( NEW(NumExpr)( this->val ) ); // don't need to substitute a number
 }
 /**
  *\brief print expression with infix and parentheses
@@ -116,7 +116,7 @@ void NumExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long p
  */
 
 
-AddExpr::AddExpr(Expr *lhs, Expr *rhs) {
+AddExpr::AddExpr(PTR(Expr)lhs, PTR(Expr)rhs) {
     this->lhs = lhs;
     this->rhs = rhs;
 }
@@ -126,8 +126,8 @@ AddExpr::AddExpr(Expr *lhs, Expr *rhs) {
 * \param e first argument,the Expression to be compared
 * \return bool if the Expression to be compared is a Add Expression with same arguments
 */
-bool AddExpr::equals(Expr* e){
-    AddExpr* n = dynamic_cast<AddExpr*>(e);
+bool AddExpr::equals(PTR(Expr) e){
+    PTR(AddExpr) n = CAST(AddExpr)(e);
     if(n == NULL){
         return false;
     }else{
@@ -139,7 +139,7 @@ bool AddExpr::equals(Expr* e){
 * \brief Calculate the sum of the subexpression values
 * \return int for this Add Expression
 */
-Val* AddExpr::interp() {
+PTR(Val) AddExpr::interp() {
     return( lhs->interp()->add_to(rhs->interp()) );
 }
 ///**
@@ -150,13 +150,13 @@ Val* AddExpr::interp() {
 //    return( lhs->has_variable() || rhs->has_variable() );
 //}
 /**
-* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
+* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
 * \param str_new first argument, the string to be replaced
 * \param e second argument, the Expression replace str_new
-* \return Expr* that after replacement
+* \return PTR(Expr) that after replacement
 */
-Expr* AddExpr::subst(std::string str_new, Expr *e){
-    return ( new AddExpr( (lhs->subst(str_new, e)) , (rhs->subst(str_new, e))) ) ;
+PTR(Expr) AddExpr::subst(std::string str_new, PTR(Expr)e){
+    return ( NEW(AddExpr)( (lhs->subst(str_new, e)) , (rhs->subst(str_new, e))) ) ;
 }
 /**
  *\brief print expression with infix and parentheses
@@ -197,7 +197,7 @@ void AddExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long p
  *** Class Mult ************************************************
  */
 
-MultExpr::MultExpr(Expr *lhs, Expr *rhs) {
+MultExpr::MultExpr(PTR(Expr)lhs, PTR(Expr)rhs) {
     this->lhs = lhs;
     this->rhs = rhs;
 }
@@ -207,8 +207,8 @@ MultExpr::MultExpr(Expr *lhs, Expr *rhs) {
 * \param e first argument,the Expression to be compared
 * \return bool if the Expression to be compared is a Mult Expression with same arguments
 */
-bool MultExpr::equals(Expr* e){
-    MultExpr* n = dynamic_cast<MultExpr*>(e);
+bool MultExpr::equals(PTR(Expr) e){
+    PTR(MultExpr) n = CAST(MultExpr)(e);
     if(n == NULL){
         return false;
     }else{
@@ -220,7 +220,7 @@ bool MultExpr::equals(Expr* e){
 * \brief Calculate the product of the subexpression values
 * \return int for this Mult Expression
 */
-Val* MultExpr::interp(){
+PTR(Val) MultExpr::interp(){
     return( lhs->interp()->mult_with(rhs->interp()) );
 }
 ///**
@@ -231,13 +231,13 @@ Val* MultExpr::interp(){
 //    return( lhs->has_variable() || rhs->has_variable() );
 //}
 /**
-* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
+* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
 * \param str_new first argument, the string to be replaced
 * \param e second argument, the Expression replace str_new
-* \return Expr* that after replacement
+* \return PTR(Expr) that after replacement
 */
-Expr* MultExpr::subst(std::string str_new, Expr *e){
-    return ( new MultExpr( (lhs->subst(str_new, e)) , (rhs->subst(str_new, e))) ) ;
+PTR(Expr) MultExpr::subst(std::string str_new, PTR(Expr)e){
+    return ( NEW(MultExpr)( (lhs->subst(str_new, e)) , (rhs->subst(str_new, e))) ) ;
 }
 /**
  *\brief print expression with infix and parentheses
@@ -261,8 +261,8 @@ void MultExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long 
     
     // check 1. rhs of * is let/if  2. * is other's lhs 3. !(p > 2) no () outside  4. p>0 means not let's body -> acc of rhs not reset to 0 -> to check add () or not
     bool accReset = true;
-    LetExpr* n = dynamic_cast<LetExpr*>(rhs);
-    IfExpr* m = dynamic_cast<IfExpr*>(rhs);
+    PTR(LetExpr) n = CAST(LetExpr)(rhs);
+    PTR(IfExpr) m = CAST(IfExpr)(rhs);
     if( (n != NULL || m != NULL) && acc > 0 && !(p > 2) && p > 0){
         accReset = false;
     }
@@ -294,8 +294,8 @@ VarExpr::VarExpr(std::string str) {
 * \param e first argument,the Expression to be compared
 * \return bool if the Expression to be compared is a Var Expression with same arguments
 */
-bool VarExpr::equals(Expr* e){
-    VarExpr* n = dynamic_cast<VarExpr*>(e);
+bool VarExpr::equals(PTR(Expr) e){
+    PTR(VarExpr) n = CAST(VarExpr)(e);
     if(n == NULL){
         return false;
     }else{
@@ -306,7 +306,7 @@ bool VarExpr::equals(Expr* e){
 /**
 * \brief A variable has no value, so interp for a variable should throw a std::runtime_error exception
 */
-Val* VarExpr::interp(){
+PTR(Val) VarExpr::interp(){
     throw std::runtime_error("no value for variable");
 }
 ///**
@@ -317,17 +317,17 @@ Val* VarExpr::interp(){
 //    return true;
 //}
 /**
-* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
+* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
 * \param str_new first argument, the string to be replaced
 * \param e second argument, the Expression replace str_new
-* \return Expr* that after replacement
+* \return PTR(Expr) that after replacement
 */
-Expr* VarExpr::subst(std::string str_new, Expr *e){
+PTR(Expr) VarExpr::subst(std::string str_new, PTR(Expr)e){
     // substitute this Var Expr by e if the string of this Var Expr equals str_new
     if(this->str == str_new){
         return e;
     }else{
-        return ( new VarExpr(this->str) );
+        return ( NEW(VarExpr)(this->str) );
     }
 }
 
@@ -345,7 +345,7 @@ void VarExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long p
  *** Class Let ************************************************
  */
 
-LetExpr::LetExpr(std::string str, Expr *rhs, Expr *body) {
+LetExpr::LetExpr(std::string str, PTR(Expr)rhs, PTR(Expr)body) {
     this->str = str;
     this->rhs = rhs;
     this->body = body;
@@ -356,8 +356,8 @@ LetExpr::LetExpr(std::string str, Expr *rhs, Expr *body) {
 * \param e first argument,the Expression to be compared
 * \return bool if the Expression to be compared is a Let Expression with same arguments
 */
-bool LetExpr::equals(Expr* e){
-    LetExpr* n = dynamic_cast<LetExpr*>(e);
+bool LetExpr::equals(PTR(Expr) e){
+    PTR(LetExpr) n = CAST(LetExpr)(e);
     if(n == NULL){
         return false;
     }else{
@@ -369,14 +369,14 @@ bool LetExpr::equals(Expr* e){
 * \brief Calculate the product of the subexpression values
 * \return int for this Let Expression
 */
-Val* LetExpr::interp(){
+PTR(Val) LetExpr::interp(){
 
 //    // rhs calculate first if they're all numbers                     // how about x + 7 + 5 ?????
 //    if(!rhs->has_variable()){
-//        rhs = new NumExpr(rhs->interp()->rep);
+//        rhs = NEW(NumExpr)(rhs->interp()->rep);
 //    }
 
-//    Val* rhs_val = rhs->interp();
+//    PTR(Val) rhs_val = rhs->interp();
     return body->subst(str,rhs->interp()->to_expr())->interp();
 }
 
@@ -389,20 +389,20 @@ Val* LetExpr::interp(){
 //}
 
 /**
-* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result Expr* should have the given replacement, instead.
+* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
 * \param str_new first argument, the string to be replaced
 * \param e second argument, the Expression replace str_new
-* \return Expr* that after replacement
+* \return PTR(Expr) that after replacement
 */
-Expr* LetExpr::subst(std::string str_new, Expr *e){
+PTR(Expr) LetExpr::subst(std::string str_new, PTR(Expr)e){
     // always substitute in the right-hand side
     // bind different〈variable〉: substitute in the body
     // bind same〈variable〉: don’t substitute in the body
     
     if( str != str_new ){
-        return ( new LetExpr(str, rhs->subst(str_new, e), body->subst(str_new, e)) );
+        return ( NEW(LetExpr)(str, rhs->subst(str_new, e), body->subst(str_new, e)) );
     }else{
-        return ( new LetExpr(str, rhs->subst(str_new, e), body->subst(str, rhs->subst(str_new, e))) );
+        return ( NEW(LetExpr)(str, rhs->subst(str_new, e), body->subst(str, rhs->subst(str_new, e))) );
     }
 }
 
@@ -465,8 +465,8 @@ BoolExpr::BoolExpr(bool val){
     this->val = val;
 }
 
-bool BoolExpr::equals(Expr *e){
-    BoolExpr* n = dynamic_cast<BoolExpr*>(e);
+bool BoolExpr::equals(PTR(Expr)e){
+    PTR(BoolExpr) n = CAST(BoolExpr)(e);
     if(n == NULL){
         return false;
     }else{
@@ -474,16 +474,16 @@ bool BoolExpr::equals(Expr *e){
     }
 }
 
-Val* BoolExpr::interp(){
-    return new BoolVal(val);
+PTR(Val) BoolExpr::interp(){
+    return NEW(BoolVal)(val);
 }
 
 //bool BoolExpr::has_variable(){
 //    return false;
 //}
 
-Expr* BoolExpr::subst(std::string str_new, Expr *e){
-    return ( new BoolExpr( this->val ) ); // don't need to substitute a boolean
+PTR(Expr) BoolExpr::subst(std::string str_new, PTR(Expr)e){
+    return ( NEW(BoolExpr)( this->val ) ); // don't need to substitute a boolean
 }
 
 void BoolExpr::print(std::ostream& ost){
@@ -497,14 +497,14 @@ void BoolExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long 
 /*
  *** Class IfExpr ************************************************
  */
-IfExpr::IfExpr(Expr* test_part, Expr* then_part, Expr* else_part){
+IfExpr::IfExpr(PTR(Expr) test_part, PTR(Expr) then_part, PTR(Expr) else_part){
     this->test_part = test_part;
     this->then_part = then_part;
     this->else_part = else_part;
 }
 
-bool IfExpr::equals(Expr *e){
-    IfExpr* n = dynamic_cast<IfExpr*>(e);
+bool IfExpr::equals(PTR(Expr)e){
+    PTR(IfExpr) n = CAST(IfExpr)(e);
     if(n == NULL){
         return false;
     }else{
@@ -514,7 +514,7 @@ bool IfExpr::equals(Expr *e){
     }
 }
 
-Val* IfExpr::interp(){
+PTR(Val) IfExpr::interp(){
     if (test_part->interp()->is_true())
         return then_part->interp();
     else
@@ -527,8 +527,8 @@ Val* IfExpr::interp(){
 //            else_part->has_variable() );
 //}
 
-Expr* IfExpr::subst(std::string str_new, Expr *e){
-    return ( new IfExpr( test_part->subst(str_new,e),
+PTR(Expr) IfExpr::subst(std::string str_new, PTR(Expr)e){
+    return ( NEW(IfExpr)( test_part->subst(str_new,e),
                         then_part->subst(str_new,e),
                         else_part->subst(str_new,e) ) );
 }
@@ -588,13 +588,13 @@ void IfExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long la
  *** Class EqExpr ************************************************
  */
 
-EqExpr::EqExpr(Expr* lhs, Expr* rhs){
+EqExpr::EqExpr(PTR(Expr) lhs, PTR(Expr) rhs){
     this->lhs = lhs;
     this->rhs = rhs;
 }
 
-bool EqExpr::equals(Expr *e){
-    EqExpr* n = dynamic_cast<EqExpr*>(e);
+bool EqExpr::equals(PTR(Expr)e){
+    PTR(EqExpr) n = CAST(EqExpr)(e);
     if(n == NULL){
         return false;
     }else{
@@ -602,16 +602,16 @@ bool EqExpr::equals(Expr *e){
     }
 }
 
-Val* EqExpr::interp(){
-    return new BoolVal(lhs->interp()->equals(rhs->interp()));
+PTR(Val) EqExpr::interp(){
+    return NEW(BoolVal)(lhs->interp()->equals(rhs->interp()));
 }
 
 //bool EqExpr::has_variable(){
 //    return ( lhs->has_variable() || rhs->has_variable() );
 //}
 
-Expr* EqExpr::subst(std::string str_new, Expr *e){
-    return new EqExpr( lhs->subst(str_new, e), rhs->subst(str_new, e) );
+PTR(Expr) EqExpr::subst(std::string str_new, PTR(Expr)e){
+    return NEW(EqExpr)( lhs->subst(str_new, e), rhs->subst(str_new, e) );
 }
 
 void EqExpr::print(std::ostream& ost){
@@ -643,13 +643,13 @@ void EqExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long po
 /*
  *** Class FunExpr ************************************************
  */
-FunExpr::FunExpr(std::string formal_arg, Expr *body){
+FunExpr::FunExpr(std::string formal_arg, PTR(Expr)body){
     this->formal_arg = formal_arg;
     this->body = body;
 }
 
-bool FunExpr::equals(Expr *e){
-    FunExpr* n = dynamic_cast<FunExpr*>(e);
+bool FunExpr::equals(PTR(Expr)e){
+    PTR(FunExpr) n = CAST(FunExpr)(e);
     if(n == NULL){
         return false;
     }else{
@@ -657,16 +657,16 @@ bool FunExpr::equals(Expr *e){
     }
 }
 
-Val* FunExpr::interp(){
-    return new FunVal(formal_arg, body);
+PTR(Val) FunExpr::interp(){
+    return NEW(FunVal)(formal_arg, body);
 }
 
 
-Expr* FunExpr::subst(std::string str_new, Expr *e){
+PTR(Expr) FunExpr::subst(std::string str_new, PTR(Expr)e){
     if( str_new == formal_arg ){
-        return new FunExpr( formal_arg ,body );
+        return NEW(FunExpr)( formal_arg ,body );
     }
-    return new FunExpr( formal_arg ,body->subst(str_new, e) );
+    return NEW(FunExpr)( formal_arg ,body->subst(str_new, e) );
 }
 
 void FunExpr::print(std::ostream& ost){
@@ -682,13 +682,13 @@ void FunExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long p
 /*
  *** Class CallExpr ************************************************
  */
-CallExpr::CallExpr(Expr *to_be_called, Expr *actual_arg){
+CallExpr::CallExpr(PTR(Expr)to_be_called, PTR(Expr)actual_arg){
     this->to_be_called = to_be_called;
     this->actual_arg = actual_arg;
 }
 
-bool CallExpr::equals(Expr *e){
-    CallExpr* n = dynamic_cast<CallExpr*>(e);
+bool CallExpr::equals(PTR(Expr)e){
+    PTR(CallExpr) n = CAST(CallExpr)(e);
     if(n == NULL){
         return false;
     }else{
@@ -696,13 +696,13 @@ bool CallExpr::equals(Expr *e){
     }
 }
 
-Val* CallExpr::interp(){
+PTR(Val) CallExpr::interp(){
     return to_be_called->interp()->call(actual_arg->interp());
 }
 
 
-Expr* CallExpr::subst(std::string str_new, Expr *e){
-    return new CallExpr( to_be_called->subst(str_new, e), actual_arg->subst(str_new, e) );
+PTR(Expr) CallExpr::subst(std::string str_new, PTR(Expr)e){
+    return NEW(CallExpr)( to_be_called->subst(str_new, e), actual_arg->subst(str_new, e) );
 }
 
 void CallExpr::print(std::ostream& ost){

@@ -39,6 +39,9 @@ run_mode_t use_arguments(int argc, const char * argv[]){
         }else if( strcmp(argv[i], "--pretty-print") == 0 ){
             return do_pretty_print;
             
+        }else if( strcmp(argv[i], "--pretty-print") == 0 ){
+            return do_pretty_print;
+            
         }else{
             std::cerr << "Error: Not an accepted argument. \n";
             exit(1);

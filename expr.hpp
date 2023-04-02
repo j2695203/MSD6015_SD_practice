@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string>
 #include <stdexcept>
+#include "pointer.h"
 
 
 typedef enum {
@@ -21,12 +22,12 @@ typedef enum {
 
 class Val;
 
-class Expr {
+CLASS(Expr) {
 public:
-    virtual bool equals(Expr *e) = 0;
-    virtual Val* interp() = 0;
+    virtual bool equals(PTR(Expr)e) = 0;
+    virtual PTR(Val) interp() = 0;
 //    virtual bool has_variable() = 0;
-    virtual Expr* subst(std::string str_new, Expr *e) = 0;
+    virtual PTR(Expr) subst(std::string str_new, PTR(Expr)e) = 0;
     
     virtual void print(std::ostream&) = 0;
     void pretty_print(std::ostream&); // driver
@@ -34,12 +35,12 @@ public:
     std::string pretty_print_to_string();
     std::string to_string();
     
-    Expr* parse_expr(std::istream &in);
-    Expr* parse_addend(std::istream &in);
-    Expr* parse_multicand(std::istream &in);
-    Expr* parse_num(std::istream &in);
-    Expr* parse_var(std::istream &in);
-    Expr* parse_let(std::istream &in);
+    PTR(Expr) parse_expr(std::istream &in);
+    PTR(Expr) parse_addend(std::istream &in);
+    PTR(Expr) parse_multicand(std::istream &in);
+    PTR(Expr) parse_num(std::istream &in);
+    PTR(Expr) parse_var(std::istream &in);
+    PTR(Expr) parse_let(std::istream &in);
 
 };
 
@@ -48,10 +49,10 @@ public:
     int val;//!< integer value of the Number expression
     NumExpr(int val);
     
-    bool equals(Expr *e);
-    Val* interp();
+    bool equals(PTR(Expr)e);
+    PTR(Val) interp();
 //    bool has_variable();
-    Expr* subst(std::string str_new, Expr *e);
+    PTR(Expr) subst(std::string str_new, PTR(Expr)e);
     
     void print(std::ostream&);
     void pretty_print_at(std::ostream&, precedence_t, int, long);
@@ -61,14 +62,14 @@ public:
 
 class AddExpr: public Expr {
 public:
-    Expr *lhs; //!< left-hand-side expression of the Number expression
-    Expr *rhs; //!< right-hand-side expression of the Number expression
-    AddExpr(Expr *lhs, Expr *rhs);
+    PTR(Expr)lhs; //!< left-hand-side expression of the Number expression
+    PTR(Expr)rhs; //!< right-hand-side expression of the Number expression
+    AddExpr(PTR(Expr)lhs, PTR(Expr)rhs);
     
-    bool equals(Expr *e);
-    Val* interp();
+    bool equals(PTR(Expr)e);
+    PTR(Val) interp();
 //    bool has_variable();
-    Expr* subst(std::string str_new, Expr *e);
+    PTR(Expr) subst(std::string str_new, PTR(Expr)e);
 
     void print(std::ostream&);
     void pretty_print_at(std::ostream&, precedence_t, int, long);
@@ -77,14 +78,14 @@ public:
 
 class MultExpr: public Expr {
 public:
-    Expr *lhs; //!<  left-hand-side expression of the Mult expression
-    Expr *rhs; //!<  right-hand-side expression of the Mult expression
-    MultExpr(Expr *lhs, Expr *rhs);
+    PTR(Expr)lhs; //!<  left-hand-side expression of the Mult expression
+    PTR(Expr)rhs; //!<  right-hand-side expression of the Mult expression
+    MultExpr(PTR(Expr)lhs, PTR(Expr)rhs);
     
-    bool equals(Expr *e);
-    Val* interp();
+    bool equals(PTR(Expr)e);
+    PTR(Val) interp();
 //    bool has_variable();
-    Expr* subst(std::string str_new, Expr *e);
+    PTR(Expr) subst(std::string str_new, PTR(Expr)e);
     
     void print(std::ostream&);
     void pretty_print_at(std::ostream&, precedence_t, int, long);
@@ -96,10 +97,10 @@ public:
     std::string str; //!<  string value of the Var expression
     VarExpr(std::string str);
     
-    bool equals(Expr *e);
-    Val* interp();
+    bool equals(PTR(Expr)e);
+    PTR(Val) interp();
 //    bool has_variable();
-    Expr* subst(std::string str_new, Expr *e);
+    PTR(Expr) subst(std::string str_new, PTR(Expr)e);
 
     void print(std::ostream&);
     void pretty_print_at(std::ostream&, precedence_t, int, long);
@@ -109,14 +110,14 @@ public:
 class LetExpr: public Expr {
 public:
     std::string str; //!<  left-hand-side string of the let expression
-    Expr *rhs; //!<  right-hand-side expression of the let expression
-    Expr *body; // body expression of the let expression
-    LetExpr(std::string str, Expr *rhs, Expr *body);
+    PTR(Expr)rhs; //!<  right-hand-side expression of the let expression
+    PTR(Expr)body; // body expression of the let expression
+    LetExpr(std::string str, PTR(Expr)rhs, PTR(Expr)body);
     
-    bool equals(Expr *e);
-    Val* interp();
+    bool equals(PTR(Expr)e);
+    PTR(Val) interp();
 //    bool has_variable();
-    Expr* subst(std::string str_new, Expr *e);
+    PTR(Expr) subst(std::string str_new, PTR(Expr)e);
     
     void print(std::ostream&);
     void pretty_print_at(std::ostream&, precedence_t, int, long);
@@ -128,10 +129,10 @@ public:
     bool val;
     BoolExpr(bool val);
     
-    bool equals(Expr *e);
-    Val* interp();
+    bool equals(PTR(Expr)e);
+    PTR(Val) interp();
 //    bool has_variable();
-    Expr* subst(std::string str_new, Expr *e);
+    PTR(Expr) subst(std::string str_new, PTR(Expr)e);
     
     void print(std::ostream&);
     void pretty_print_at(std::ostream&, precedence_t, int, long);
@@ -140,15 +141,15 @@ public:
 
 class IfExpr: public Expr{
 public:
-    Expr* test_part;
-    Expr* then_part;
-    Expr* else_part;
-    IfExpr(Expr* test_part, Expr* then_part, Expr* else_part);
+    PTR(Expr) test_part;
+    PTR(Expr) then_part;
+    PTR(Expr) else_part;
+    IfExpr(PTR(Expr) test_part, PTR(Expr) then_part, PTR(Expr) else_part);
     
-    bool equals(Expr *e);
-    Val* interp();
+    bool equals(PTR(Expr)e);
+    PTR(Val) interp();
 //    bool has_variable();
-    Expr* subst(std::string str_new, Expr *e);
+    PTR(Expr) subst(std::string str_new, PTR(Expr)e);
     
     void print(std::ostream&);
     void pretty_print_at(std::ostream&, precedence_t, int, long);
@@ -157,14 +158,14 @@ public:
 
 class EqExpr: public Expr{
 public:
-    Expr* lhs;
-    Expr* rhs;
-    EqExpr(Expr* lhs, Expr* rhs);
+    PTR(Expr) lhs;
+    PTR(Expr) rhs;
+    EqExpr(PTR(Expr) lhs, PTR(Expr) rhs);
     
-    bool equals(Expr *e);
-    Val* interp();
+    bool equals(PTR(Expr)e);
+    PTR(Val) interp();
 //    bool has_variable();
-    Expr* subst(std::string str_new, Expr *e);
+    PTR(Expr) subst(std::string str_new, PTR(Expr)e);
     
     void print(std::ostream&);
     void pretty_print_at(std::ostream&, precedence_t, int, long);
@@ -174,12 +175,12 @@ public:
 class FunExpr: public Expr {
 public:
     std::string formal_arg;
-    Expr *body;
-    FunExpr(std::string formal_arg, Expr *body);
+    PTR(Expr)body;
+    FunExpr(std::string formal_arg, PTR(Expr)body);
     
-    bool equals(Expr *e);
-    Val* interp();
-    Expr* subst(std::string str_new, Expr *e);
+    bool equals(PTR(Expr)e);
+    PTR(Val) interp();
+    PTR(Expr) subst(std::string str_new, PTR(Expr)e);
 
     void print(std::ostream&);
     void pretty_print_at(std::ostream&, precedence_t, int, long);
@@ -187,13 +188,13 @@ public:
 
 class CallExpr: public Expr {
 public:
-    Expr *to_be_called;
-    Expr *actual_arg;
-    CallExpr(Expr *to_be_called, Expr *actual_arg);
+    PTR(Expr)to_be_called;
+    PTR(Expr)actual_arg;
+    CallExpr(PTR(Expr)to_be_called, PTR(Expr)actual_arg);
     
-    bool equals(Expr *e);
-    Val* interp();
-    Expr* subst(std::string str_new, Expr *e);
+    bool equals(PTR(Expr)e);
+    PTR(Val) interp();
+    PTR(Expr) subst(std::string str_new, PTR(Expr)e);
 
     void print(std::ostream&);
     void pretty_print_at(std::ostream&, precedence_t, int, long);

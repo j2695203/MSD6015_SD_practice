@@ -16,8 +16,8 @@ NumVal::NumVal(int rep){
     this->rep = rep;
 }
 
-bool NumVal::equals(Val* e){
-    NumVal* n = dynamic_cast<NumVal*>(e);
+bool NumVal::equals(PTR(Val) e){
+    PTR(NumVal) n = CAST(NumVal)(e);
     if(n == NULL){
         return false;
     }else{
@@ -25,33 +25,33 @@ bool NumVal::equals(Val* e){
     }
 }
 
-Expr* NumVal::to_expr(){
-    return new NumExpr(rep);
+PTR(Expr) NumVal::to_expr(){
+    return NEW(NumExpr)(rep);
 }
 
 std::string NumVal::to_string(){
     return std::to_string(rep);
 }
 
-Val* NumVal::add_to(Val* other_val){
-    NumVal* other_num = dynamic_cast<NumVal*>(other_val);
+PTR(Val) NumVal::add_to(PTR(Val) other_val){
+    PTR(NumVal) other_num = CAST(NumVal)(other_val);
       if (other_num == NULL)
           throw std::runtime_error("add of non-number");
-      return new NumVal((unsigned)rep + (unsigned)other_num->rep);
+      return NEW(NumVal)((unsigned)rep + (unsigned)other_num->rep);
 }
 
-Val* NumVal::mult_with(Val* other_val){
-    NumVal* other_num = dynamic_cast<NumVal*>(other_val);
+PTR(Val) NumVal::mult_with(PTR(Val) other_val){
+    PTR(NumVal) other_num = CAST(NumVal)(other_val);
       if (other_num == NULL)
           throw std::runtime_error("mult of non-number");
-      return new NumVal((unsigned)rep * (unsigned)other_num->rep);
+      return NEW(NumVal)((unsigned)rep * (unsigned)other_num->rep);
 }
 
 bool NumVal::is_true(){
     throw std::runtime_error("no boolean for NumVal");
 }
 
-Val* NumVal::call(Val *actual_arg){
+PTR(Val) NumVal::call(PTR(Val)actual_arg){
     throw std::runtime_error("no call for NumVal");
 }
 
@@ -65,8 +65,8 @@ BoolVal::BoolVal(bool rep){
     this->rep = rep;
 }
 
-bool BoolVal::equals(Val* e){
-    BoolVal* n = dynamic_cast<BoolVal*>(e);
+bool BoolVal::equals(PTR(Val) e){
+    PTR(BoolVal) n = CAST(BoolVal)(e);
     if(n == NULL){
         return false;
     }else{
@@ -74,8 +74,8 @@ bool BoolVal::equals(Val* e){
     }
 }
 
-Expr* BoolVal::to_expr(){
-    return new BoolExpr(rep);
+PTR(Expr) BoolVal::to_expr(){
+    return NEW(BoolExpr)(rep);
 }
 
 std::string BoolVal::to_string(){
@@ -85,11 +85,11 @@ std::string BoolVal::to_string(){
         return "_false";
 }
 
-Val* BoolVal::add_to(Val* other_val){
+PTR(Val) BoolVal::add_to(PTR(Val) other_val){
     throw std::runtime_error("add of non-number");
 }
 
-Val* BoolVal::mult_with(Val* other_val){
+PTR(Val) BoolVal::mult_with(PTR(Val) other_val){
     throw std::runtime_error("mult of non-number");
 }
 
@@ -97,7 +97,7 @@ bool BoolVal::is_true(){
     return rep;
 }
 
-Val* BoolVal::call(Val *actual_arg){
+PTR(Val) BoolVal::call(PTR(Val)actual_arg){
     throw std::runtime_error("no call for BoolVal");
 }
 
@@ -105,13 +105,13 @@ Val* BoolVal::call(Val *actual_arg){
  *** Class FunVal ************************************************
  */
 
-FunVal::FunVal(std::string formal_arg, Expr *body){
+FunVal::FunVal(std::string formal_arg, PTR(Expr)body){
     this->formal_arg = formal_arg;
     this->body = body;
 }
 
-bool FunVal::equals(Val* e){
-    FunVal* n = dynamic_cast<FunVal*>(e);
+bool FunVal::equals(PTR(Val) e){
+    PTR(FunVal) n = CAST(FunVal)(e);
     if(n == NULL){
         return false;
     }else{
@@ -119,19 +119,19 @@ bool FunVal::equals(Val* e){
     }
 }
 
-Expr* FunVal::to_expr(){
-    return new FunExpr(formal_arg, body);
+PTR(Expr) FunVal::to_expr(){
+    return NEW(FunExpr)(formal_arg, body);
 }
 
 std::string FunVal::to_string(){
     throw std::runtime_error("no to_string for FunVal");
 }
 
-Val* FunVal::add_to(Val* other_val){
+PTR(Val) FunVal::add_to(PTR(Val) other_val){
     throw std::runtime_error("no add_to for FunVal");
 }
 
-Val* FunVal::mult_with(Val* other_val){
+PTR(Val) FunVal::mult_with(PTR(Val) other_val){
     throw std::runtime_error("no mult_with for FunVal");
 }
 
@@ -139,6 +139,6 @@ bool FunVal::is_true(){
     throw std::runtime_error("no is_true for FunVal");
 }
 
-Val* FunVal::call(Val *actual_arg){
+PTR(Val) FunVal::call(PTR(Val)actual_arg){
     return (body->subst(formal_arg, actual_arg->to_expr()))->interp();
 }

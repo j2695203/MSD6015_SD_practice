@@ -11,7 +11,7 @@
 CXXSOURCE = main.cpp cmdline.cpp expr.cpp val.cpp parse.cpp tests.cpp
 CXXSOURCE_test = testDriver.cpp exec.cpp
 
-HEADERS = cmdline.hpp expr.hpp val.hpp catch.h parse.hpp
+HEADERS = cmdline.hpp expr.hpp val.hpp catch.h parse.hpp pointer.h
 HEADERS_test = testDriver.hpp exec.h
 
 CXXFLAGS = -std=c++11 -fsanitize=undefined -fno-sanitize-recover=undefined

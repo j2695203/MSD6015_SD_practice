@@ -2,8 +2,9 @@
 #define exec_hpp
 
 #include <string>
+#include "pointer.h"
 
-class ExecResult {
+CLASS(ExecResult) {
 public:
   int exit_code;
   std::string out;

@@ -25,8 +25,8 @@ static void skip_whitespace(std::istream &in){
     }
 }
 
-Expr* parse_expr(std::istream &in){
-    Expr* e = parse_comparg(in);
+PTR(Expr) parse_expr(std::istream &in){
+    PTR(Expr) e = parse_comparg(in);
     skip_whitespace(in);
     
     int c = in.peek();
@@ -36,38 +36,38 @@ Expr* parse_expr(std::istream &in){
     }else if( c == '='){
         consume(in, c);
         consume(in, '=');
-        Expr* rhs = parse_expr(in);
-        return new EqExpr(e, rhs);
+        PTR(Expr) rhs = parse_expr(in);
+        return NEW(EqExpr)(e, rhs);
     }else{
         return e;
     }
 }
 
-Expr* parse_comparg(std::istream &in){
-    Expr* e = parse_addend(in);
+PTR(Expr) parse_comparg(std::istream &in){
+    PTR(Expr) e = parse_addend(in);
     
     skip_whitespace(in);
     
     int c = in.peek();
     if( c == '+'){
         consume(in, c);
-        Expr* rhs = parse_comparg(in);
-        return new AddExpr(e, rhs);
+        PTR(Expr) rhs = parse_comparg(in);
+        return NEW(AddExpr)(e, rhs);
     }else{
         return e;
     }
 }
 
-Expr* parse_addend(std::istream &in){
-    Expr* e = parse_multicand(in);
+PTR(Expr) parse_addend(std::istream &in){
+    PTR(Expr) e = parse_multicand(in);
     
     skip_whitespace(in);
     
     int c = in.peek();
     if( c == '*'){
         consume(in, c);
-        Expr* rhs = parse_addend(in);
-        return new MultExpr(e, rhs);
+        PTR(Expr) rhs = parse_addend(in);
+        return NEW(MultExpr)(e, rhs);
 //    }else if( (c >= 32 && c <= 126) && c != '+' && c != ')' && c != '_' ){ // no other character
 //        throw std::runtime_error("invalid input");
     }else{
@@ -75,16 +75,16 @@ Expr* parse_addend(std::istream &in){
     }
 }
 
-Expr* parse_multicand(std::istream &in){
-    Expr* e = parse_inner(in);
+PTR(Expr) parse_multicand(std::istream &in){
+    PTR(Expr) e = parse_inner(in);
     
     skip_whitespace(in);
     
     while( in.peek() == '('){
         consume(in, '(');
-        Expr* actual_arg = parse_expr(in);
+        PTR(Expr) actual_arg = parse_expr(in);
         consume(in, ')');
-        e = new CallExpr(e, actual_arg);
+        e = NEW(CallExpr)(e, actual_arg);
     }
     return e;
 }
@@ -92,7 +92,7 @@ Expr* parse_multicand(std::istream &in){
 /**
  num, (expr), var, _let var = expr _in expr
  */
-Expr* parse_inner(std::istream &in){
+PTR(Expr) parse_inner(std::istream &in){
     // skip whitespace
     skip_whitespace(in);
     
@@ -103,7 +103,7 @@ Expr* parse_inner(std::istream &in){
         
     }else if ( c == '(' ){
         consume(in, c);
-        Expr* e = parse_expr(in);
+        PTR(Expr) e = parse_expr(in);
         skip_whitespace(in);
         c = in.get();
         if( c != ')' ){
@@ -122,9 +122,9 @@ Expr* parse_inner(std::istream &in){
         if( keyword == "let" ) // let
             return parse_let(in);
         else if( keyword == "true" ) // true
-            return new BoolExpr(true);
+            return NEW(BoolExpr)(true);
         else if( keyword == "false" ) // false
-            return new BoolExpr(false);
+            return NEW(BoolExpr)(false);
         else if( keyword == "if" ) // if
             return parse_if(in);
         else if( keyword == "fun" ) // fun
@@ -138,7 +138,7 @@ Expr* parse_inner(std::istream &in){
     }
 }
 
-Expr* parse_num(std::istream &in){
+PTR(Expr) parse_num(std::istream &in){
     // skip whitespace
     skip_whitespace(in);
     
@@ -170,10 +170,10 @@ Expr* parse_num(std::istream &in){
     if( negative ){
         n = -n;
     }
-    return new NumExpr(n);
+    return NEW(NumExpr)(n);
 }
 
-Expr* parse_var(std::istream &in){
+PTR(Expr) parse_var(std::istream &in){
     // skip whitespace
     skip_whitespace(in);
     
@@ -190,11 +190,11 @@ Expr* parse_var(std::istream &in){
             break;
         }
     }
-    return new VarExpr(s);
+    return NEW(VarExpr)(s);
 }
 
 
-Expr* parse_let(std::istream &in){
+PTR(Expr) parse_let(std::istream &in){
     
     skip_whitespace(in);
     
@@ -211,7 +211,7 @@ Expr* parse_let(std::istream &in){
     skip_whitespace(in);
     
     // rhs expression
-    Expr* rhs = parse_expr(in);
+    PTR(Expr) rhs = parse_expr(in);
     skip_whitespace(in);
     
     // "_in"
@@ -224,19 +224,19 @@ Expr* parse_let(std::istream &in){
     skip_whitespace(in);
     
     // body expression
-    Expr* body = parse_expr(in);
+    PTR(Expr) body = parse_expr(in);
     
     // return let expression
-    return new LetExpr(str, rhs, body);
+    return NEW(LetExpr)(str, rhs, body);
 }
 
 
-Expr* parse_if(std::istream &in){
+PTR(Expr) parse_if(std::istream &in){
     
     skip_whitespace(in);
     
     // test expression
-    Expr* test_part = parse_expr(in);
+    PTR(Expr) test_part = parse_expr(in);
     skip_whitespace(in);
     
     // _then
@@ -248,7 +248,7 @@ Expr* parse_if(std::istream &in){
     skip_whitespace(in);
     
     // then expression
-    Expr* then_part = parse_expr(in);
+    PTR(Expr) then_part = parse_expr(in);
     skip_whitespace(in);
     
     // _else
@@ -260,15 +260,15 @@ Expr* parse_if(std::istream &in){
     skip_whitespace(in);
     
     // else expression
-    Expr* else_part = parse_expr(in);
+    PTR(Expr) else_part = parse_expr(in);
     skip_whitespace(in);
     
     // return if expression
-    return new IfExpr(test_part, then_part, else_part);
+    return NEW(IfExpr)(test_part, then_part, else_part);
     
 }
 
-Expr* parse_fun(std::istream &in){
+PTR(Expr) parse_fun(std::istream &in){
     
     skip_whitespace(in);
     
@@ -289,19 +289,19 @@ Expr* parse_fun(std::istream &in){
     skip_whitespace(in);
     
     // body expression
-    Expr* body = parse_expr(in);
+    PTR(Expr) body = parse_expr(in);
     
     // return fun expression
-    return new FunExpr(formal_arg, body);
+    return NEW(FunExpr)(formal_arg, body);
 }
 
 
 
 // for test
-Expr* parse_str(std::string str){
+PTR(Expr) parse_str(std::string str){
     // put the test string into stream
     std::istringstream in(str) ;
-    Expr* e = parse_comparg(in);
+    PTR(Expr) e = parse_comparg(in);
     
     skip_whitespace(in);
     
@@ -309,8 +309,8 @@ Expr* parse_str(std::string str){
     if( c == '='){
         consume(in, c);
         consume(in, '=');
-        Expr* rhs = parse_expr(in);
-        return new EqExpr(e, rhs);
+        PTR(Expr) rhs = parse_expr(in);
+        return NEW(EqExpr)(e, rhs);
     }else{
         return e;
     }
