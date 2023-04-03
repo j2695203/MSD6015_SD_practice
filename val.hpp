@@ -15,11 +15,12 @@
 
 class Expr;
 
+class Env;
 
 CLASS(Val){
 public:
     virtual bool equals(PTR(Val) e) = 0;
-    virtual PTR(Expr) to_expr() = 0;
+//    virtual PTR(Expr) to_expr() = 0;
     virtual PTR(Val) add_to(PTR(Val) other_val) = 0;
     virtual PTR(Val) mult_with(PTR(Val) other_val) = 0;
     virtual std::string to_string() = 0;
@@ -34,7 +35,7 @@ public:
     NumVal(int rep);
     
     bool equals(PTR(Val) e);
-    PTR(Expr) to_expr();
+//    PTR(Expr) to_expr();
     PTR(Val) add_to(PTR(Val) other_val);
     PTR(Val) mult_with(PTR(Val) other_val);
     std::string to_string();
@@ -49,7 +50,7 @@ public:
     BoolVal(bool rep);
     
     bool equals(PTR(Val) e);
-    PTR(Expr) to_expr();
+//    PTR(Expr) to_expr();
     PTR(Val) add_to(PTR(Val) other_val);
     PTR(Val) mult_with(PTR(Val) other_val);
     std::string to_string();
@@ -62,10 +63,11 @@ class FunVal: public Val{
 public:
     std::string formal_arg;
     PTR(Expr)body;
-    FunVal(std::string formal_arg, PTR(Expr)body);
+    PTR(Env)env;
+    FunVal(std::string formal_arg, PTR(Expr)body, PTR(Env)env);
     
     bool equals(PTR(Val) e);
-    PTR(Expr) to_expr();
+//    PTR(Expr) to_expr();
     PTR(Val) add_to(PTR(Val) other_val);
     PTR(Val) mult_with(PTR(Val) other_val);
     std::string to_string();

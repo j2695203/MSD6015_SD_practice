@@ -16,6 +16,7 @@
 #include "expr.hpp"
 #include "cmdline.hpp"
 #include "parse.hpp"
+#include "env.hpp"
 #include <cassert>
 
 #include "catch.h"
@@ -33,7 +34,7 @@ int main(int argc, const char ** argv) {
                 
             case do_interp:
 //                std::cout << "Value: " << parse_expr(std::cin)->interp() << "\n";
-                std::cout << parse_expr(std::cin)->interp()->to_string() << "\n";
+                std::cout << parse_expr(std::cin)->interp(Env::empty)->to_string() << "\n";
                 exit(0);
                 
             case do_print:

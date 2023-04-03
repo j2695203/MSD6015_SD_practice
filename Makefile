@@ -8,10 +8,10 @@
 # clean - delete derived files from make
 
 
-CXXSOURCE = main.cpp cmdline.cpp expr.cpp val.cpp parse.cpp tests.cpp
+CXXSOURCE = main.cpp cmdline.cpp expr.cpp val.cpp parse.cpp tests.cpp env.cpp
 CXXSOURCE_test = testDriver.cpp exec.cpp
 
-HEADERS = cmdline.hpp expr.hpp val.hpp catch.h parse.hpp pointer.h
+HEADERS = cmdline.hpp expr.hpp val.hpp catch.h parse.hpp pointer.h env.hpp
 HEADERS_test = testDriver.hpp exec.h
 
 CXXFLAGS = -std=c++11 -fsanitize=undefined -fno-sanitize-recover=undefined

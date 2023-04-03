@@ -11,6 +11,7 @@
 #include "val.hpp"
 #include "expr.hpp"
 #include "catch.h"
+#include "env.hpp"
 
 
 /*
@@ -73,7 +74,7 @@ bool NumExpr::equals(PTR(Expr) e){
 * \brief return an int for the value of the number.
 * \return int for this Number Expression
 */
-PTR(Val) NumExpr::interp(){
+PTR(Val) NumExpr::interp(PTR(Env)env){
     return NEW(NumVal)(val);
 }
 ///**
@@ -83,15 +84,17 @@ PTR(Val) NumExpr::interp(){
 //bool NumExpr::has_variable(){
 //    return false;
 //}
-/**
-* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
-* \param str_new first argument, the string to be replaced
-* \param e second argument, the Expression replace str_new
-* \return PTR(Expr) that after replacement
-*/
-PTR(Expr) NumExpr::subst(std::string str_new, PTR(Expr)e){
-    return ( NEW(NumExpr)( this->val ) ); // don't need to substitute a number
-}
+
+///**
+//* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
+//* \param str_new first argument, the string to be replaced
+//* \param e second argument, the Expression replace str_new
+//* \return PTR(Expr) that after replacement
+//*/
+//PTR(Expr) NumExpr::subst(std::string str_new, PTR(Expr)e){
+//    return ( NEW(NumExpr)( this->val ) ); // don't need to substitute a number
+//}
+
 /**
  *\brief print expression with infix and parentheses
  */
@@ -139,9 +142,10 @@ bool AddExpr::equals(PTR(Expr) e){
 * \brief Calculate the sum of the subexpression values
 * \return int for this Add Expression
 */
-PTR(Val) AddExpr::interp() {
-    return( lhs->interp()->add_to(rhs->interp()) );
+PTR(Val) AddExpr::interp(PTR(Env)env) {
+    return( lhs->interp(env)->add_to(rhs->interp(env)) );
 }
+
 ///**
 //* \brief Check if the Add expression is a variable or contains a variable.
 //* \return bool if the Add expression is a variable or contains a variable.
@@ -149,15 +153,17 @@ PTR(Val) AddExpr::interp() {
 //bool AddExpr::has_variable(){
 //    return( lhs->has_variable() || rhs->has_variable() );
 //}
-/**
-* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
-* \param str_new first argument, the string to be replaced
-* \param e second argument, the Expression replace str_new
-* \return PTR(Expr) that after replacement
-*/
-PTR(Expr) AddExpr::subst(std::string str_new, PTR(Expr)e){
-    return ( NEW(AddExpr)( (lhs->subst(str_new, e)) , (rhs->subst(str_new, e))) ) ;
-}
+
+///**
+//* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
+//* \param str_new first argument, the string to be replaced
+//* \param e second argument, the Expression replace str_new
+//* \return PTR(Expr) that after replacement
+//*/
+//PTR(Expr) AddExpr::subst(std::string str_new, PTR(Expr)e){
+//    return ( NEW(AddExpr)( (lhs->subst(str_new, e)) , (rhs->subst(str_new, e))) ) ;
+//}
+
 /**
  *\brief print expression with infix and parentheses
  */
@@ -220,8 +226,8 @@ bool MultExpr::equals(PTR(Expr) e){
 * \brief Calculate the product of the subexpression values
 * \return int for this Mult Expression
 */
-PTR(Val) MultExpr::interp(){
-    return( lhs->interp()->mult_with(rhs->interp()) );
+PTR(Val) MultExpr::interp(PTR(Env)env){
+    return( lhs->interp(env)->mult_with(rhs->interp(env)) );
 }
 ///**
 //* \brief Check if the Mult expression is a variable or contains a variable.
@@ -230,15 +236,17 @@ PTR(Val) MultExpr::interp(){
 //bool MultExpr::has_variable(){
 //    return( lhs->has_variable() || rhs->has_variable() );
 //}
-/**
-* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
-* \param str_new first argument, the string to be replaced
-* \param e second argument, the Expression replace str_new
-* \return PTR(Expr) that after replacement
-*/
-PTR(Expr) MultExpr::subst(std::string str_new, PTR(Expr)e){
-    return ( NEW(MultExpr)( (lhs->subst(str_new, e)) , (rhs->subst(str_new, e))) ) ;
-}
+
+///**
+//* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
+//* \param str_new first argument, the string to be replaced
+//* \param e second argument, the Expression replace str_new
+//* \return PTR(Expr) that after replacement
+//*/
+//PTR(Expr) MultExpr::subst(std::string str_new, PTR(Expr)e){
+//    return ( NEW(MultExpr)( (lhs->subst(str_new, e)) , (rhs->subst(str_new, e))) ) ;
+//}
+
 /**
  *\brief print expression with infix and parentheses
  */
@@ -306,8 +314,8 @@ bool VarExpr::equals(PTR(Expr) e){
 /**
 * \brief A variable has no value, so interp for a variable should throw a std::runtime_error exception
 */
-PTR(Val) VarExpr::interp(){
-    throw std::runtime_error("no value for variable");
+PTR(Val) VarExpr::interp(PTR(Env)env){
+    return env->lookup(this->str);
 }
 ///**
 //* \brief Check if the Var expression is a variable.
@@ -316,20 +324,21 @@ PTR(Val) VarExpr::interp(){
 //bool VarExpr::has_variable(){
 //    return true;
 //}
-/**
-* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
-* \param str_new first argument, the string to be replaced
-* \param e second argument, the Expression replace str_new
-* \return PTR(Expr) that after replacement
-*/
-PTR(Expr) VarExpr::subst(std::string str_new, PTR(Expr)e){
-    // substitute this Var Expr by e if the string of this Var Expr equals str_new
-    if(this->str == str_new){
-        return e;
-    }else{
-        return ( NEW(VarExpr)(this->str) );
-    }
-}
+
+///**
+//* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
+//* \param str_new first argument, the string to be replaced
+//* \param e second argument, the Expression replace str_new
+//* \return PTR(Expr) that after replacement
+//*/
+//PTR(Expr) VarExpr::subst(std::string str_new, PTR(Expr)e){
+//    // substitute this Var Expr by e if the string of this Var Expr equals str_new
+//    if(this->str == str_new){
+//        return e;
+//    }else{
+//        return ( NEW(VarExpr)(this->str) );
+//    }
+//}
 
 void VarExpr::print(std::ostream& ot){
     ot<<str;
@@ -369,15 +378,16 @@ bool LetExpr::equals(PTR(Expr) e){
 * \brief Calculate the product of the subexpression values
 * \return int for this Let Expression
 */
-PTR(Val) LetExpr::interp(){
+PTR(Val) LetExpr::interp(PTR(Env)env){
 
 //    // rhs calculate first if they're all numbers                     // how about x + 7 + 5 ?????
 //    if(!rhs->has_variable()){
 //        rhs = NEW(NumExpr)(rhs->interp()->rep);
 //    }
 
-//    PTR(Val) rhs_val = rhs->interp();
-    return body->subst(str,rhs->interp()->to_expr())->interp();
+    PTR(Val) rhs_val = rhs->interp(env);
+    PTR(Env) new_env = NEW(ExtendedEnv)(str,rhs_val,env);
+    return body->interp(new_env);
 }
 
 ///**
@@ -388,23 +398,22 @@ PTR(Val) LetExpr::interp(){
 //    return( rhs->has_variable() || body->has_variable() );
 //}
 
-/**
-* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
-* \param str_new first argument, the string to be replaced
-* \param e second argument, the Expression replace str_new
-* \return PTR(Expr) that after replacement
-*/
-PTR(Expr) LetExpr::subst(std::string str_new, PTR(Expr)e){
-    // always substitute in the right-hand side
-    // bind different〈variable〉: substitute in the body
-    // bind same〈variable〉: don’t substitute in the body
-    
-    if( str != str_new ){
-        return ( NEW(LetExpr)(str, rhs->subst(str_new, e), body->subst(str_new, e)) );
-    }else{
-        return ( NEW(LetExpr)(str, rhs->subst(str_new, e), body->subst(str, rhs->subst(str_new, e))) );
-    }
-}
+///**
+//* \brief Everywhere that the expression (whose subst method is called) contains a variable matching the str_new, the result PTR(Expr) should have the given replacement, instead.
+//* \param str_new first argument, the string to be replaced
+//* \param e second argument, the Expression replace str_new
+//* \return PTR(Expr) that after replacement
+//*/
+//PTR(Expr) LetExpr::subst(std::string str_new, PTR(Expr)e){
+//    // always substitute in the right-hand side
+//    // bind different〈variable〉: substitute in the body
+//    // bind same〈variable〉: don’t substitute in the body
+//    if( str != str_new ){
+//        return ( NEW(LetExpr)(str, rhs->subst(str_new, e), body->subst(str_new, e)) );
+//    }else{
+//        return ( NEW(LetExpr)(str, rhs->subst(str_new, e), body->subst(str, rhs->subst(str_new, e))) );
+//    }
+//}
 
 /**
  *\brief print expression with infix and parentheses
@@ -474,7 +483,7 @@ bool BoolExpr::equals(PTR(Expr)e){
     }
 }
 
-PTR(Val) BoolExpr::interp(){
+PTR(Val) BoolExpr::interp(PTR(Env)env){
     return NEW(BoolVal)(val);
 }
 
@@ -482,16 +491,16 @@ PTR(Val) BoolExpr::interp(){
 //    return false;
 //}
 
-PTR(Expr) BoolExpr::subst(std::string str_new, PTR(Expr)e){
-    return ( NEW(BoolExpr)( this->val ) ); // don't need to substitute a boolean
-}
+//PTR(Expr) BoolExpr::subst(std::string str_new, PTR(Expr)e){
+//    return ( NEW(BoolExpr)( this->val ) ); // don't need to substitute a boolean
+//}
 
 void BoolExpr::print(std::ostream& ost){
-    ost<<this->interp()->to_string();
+    ost<< NEW(BoolVal)(val)->to_string();
 }
 
 void BoolExpr::pretty_print_at(std::ostream& ost, precedence_t p, int acc, long pos){
-    ost<<this->interp()->to_string();
+    ost<< NEW(BoolVal)(val)->to_string();
 }
 
 /*
@@ -514,11 +523,11 @@ bool IfExpr::equals(PTR(Expr)e){
     }
 }
 
-PTR(Val) IfExpr::interp(){
-    if (test_part->interp()->is_true())
-        return then_part->interp();
+PTR(Val) IfExpr::interp(PTR(Env)env){
+    if (test_part->interp(env)->is_true())
+        return then_part->interp(env);
     else
-        return else_part->interp();
+        return else_part->interp(env);
 }
 
 //bool IfExpr::has_variable(){
@@ -527,11 +536,11 @@ PTR(Val) IfExpr::interp(){
 //            else_part->has_variable() );
 //}
 
-PTR(Expr) IfExpr::subst(std::string str_new, PTR(Expr)e){
-    return ( NEW(IfExpr)( test_part->subst(str_new,e),
-                        then_part->subst(str_new,e),
-                        else_part->subst(str_new,e) ) );
-}
+//PTR(Expr) IfExpr::subst(std::string str_new, PTR(Expr)e){
+//    return ( NEW(IfExpr)( test_part->subst(str_new,e),
+//                        then_part->subst(str_new,e),
+//                        else_part->subst(str_new,e) ) );
+//}
 
 void IfExpr::print(std::ostream& ost){
     ost<<"(_if ";
@@ -602,17 +611,17 @@ bool EqExpr::equals(PTR(Expr)e){
     }
 }
 
-PTR(Val) EqExpr::interp(){
-    return NEW(BoolVal)(lhs->interp()->equals(rhs->interp()));
+PTR(Val) EqExpr::interp(PTR(Env)env){
+    return NEW(BoolVal)(lhs->interp(env)->equals(rhs->interp(env)));
 }
 
 //bool EqExpr::has_variable(){
 //    return ( lhs->has_variable() || rhs->has_variable() );
 //}
 
-PTR(Expr) EqExpr::subst(std::string str_new, PTR(Expr)e){
-    return NEW(EqExpr)( lhs->subst(str_new, e), rhs->subst(str_new, e) );
-}
+//PTR(Expr) EqExpr::subst(std::string str_new, PTR(Expr)e){
+//    return NEW(EqExpr)( lhs->subst(str_new, e), rhs->subst(str_new, e) );
+//}
 
 void EqExpr::print(std::ostream& ost){
     ost<<"(";
@@ -657,17 +666,17 @@ bool FunExpr::equals(PTR(Expr)e){
     }
 }
 
-PTR(Val) FunExpr::interp(){
-    return NEW(FunVal)(formal_arg, body);
+PTR(Val) FunExpr::interp(PTR(Env)env){
+    return NEW(FunVal)(formal_arg, body, env);
 }
 
 
-PTR(Expr) FunExpr::subst(std::string str_new, PTR(Expr)e){
-    if( str_new == formal_arg ){
-        return NEW(FunExpr)( formal_arg ,body );
-    }
-    return NEW(FunExpr)( formal_arg ,body->subst(str_new, e) );
-}
+//PTR(Expr) FunExpr::subst(std::string str_new, PTR(Expr)e){
+//    if( str_new == formal_arg ){
+//        return NEW(FunExpr)( formal_arg ,body );
+//    }
+//    return NEW(FunExpr)( formal_arg ,body->subst(str_new, e) );
+//}
 
 void FunExpr::print(std::ostream& ost){
     ost<<"(_fun (" << formal_arg << ") ";
@@ -696,14 +705,14 @@ bool CallExpr::equals(PTR(Expr)e){
     }
 }
 
-PTR(Val) CallExpr::interp(){
-    return to_be_called->interp()->call(actual_arg->interp());
+PTR(Val) CallExpr::interp(PTR(Env)env){
+    return to_be_called->interp(env)->call(actual_arg->interp(env));
 }
 
 
-PTR(Expr) CallExpr::subst(std::string str_new, PTR(Expr)e){
-    return NEW(CallExpr)( to_be_called->subst(str_new, e), actual_arg->subst(str_new, e) );
-}
+//PTR(Expr) CallExpr::subst(std::string str_new, PTR(Expr)e){
+//    return NEW(CallExpr)( to_be_called->subst(str_new, e), actual_arg->subst(str_new, e) );
+//}
 
 void CallExpr::print(std::ostream& ost){
     to_be_called->print(ost);

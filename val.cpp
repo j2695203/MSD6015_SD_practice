@@ -7,6 +7,7 @@
 
 #include "val.hpp"
 #include "expr.hpp"
+#include "env.hpp"
 
 /*
  *** Class NumVal ************************************************
@@ -25,9 +26,9 @@ bool NumVal::equals(PTR(Val) e){
     }
 }
 
-PTR(Expr) NumVal::to_expr(){
-    return NEW(NumExpr)(rep);
-}
+//PTR(Expr) NumVal::to_expr(){
+//    return NEW(NumExpr)(rep);
+//}
 
 std::string NumVal::to_string(){
     return std::to_string(rep);
@@ -74,9 +75,9 @@ bool BoolVal::equals(PTR(Val) e){
     }
 }
 
-PTR(Expr) BoolVal::to_expr(){
-    return NEW(BoolExpr)(rep);
-}
+//PTR(Expr) BoolVal::to_expr(){
+//    return NEW(BoolExpr)(rep);
+//}
 
 std::string BoolVal::to_string(){
     if(rep)
@@ -105,9 +106,10 @@ PTR(Val) BoolVal::call(PTR(Val)actual_arg){
  *** Class FunVal ************************************************
  */
 
-FunVal::FunVal(std::string formal_arg, PTR(Expr)body){
+FunVal::FunVal(std::string formal_arg, PTR(Expr)body, PTR(Env)env){
     this->formal_arg = formal_arg;
     this->body = body;
+    this->env = env;
 }
 
 bool FunVal::equals(PTR(Val) e){
@@ -119,9 +121,9 @@ bool FunVal::equals(PTR(Val) e){
     }
 }
 
-PTR(Expr) FunVal::to_expr(){
-    return NEW(FunExpr)(formal_arg, body);
-}
+//PTR(Expr) FunVal::to_expr(){
+//    return NEW(FunExpr)(formal_arg, body);
+//}
 
 std::string FunVal::to_string(){
     throw std::runtime_error("no to_string for FunVal");
@@ -140,5 +142,5 @@ bool FunVal::is_true(){
 }
 
 PTR(Val) FunVal::call(PTR(Val)actual_arg){
-    return (body->subst(formal_arg, actual_arg->to_expr()))->interp();
+    return body->interp(NEW(ExtendedEnv)(formal_arg,actual_arg,env));
 }
