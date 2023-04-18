@@ -1,0 +1,5 @@
+_let f = _fun (x) x + 1
+_in _let g = _fun (y) y + 2
+    _in _if _true
+        _then f(5)
+        _else g(5)
